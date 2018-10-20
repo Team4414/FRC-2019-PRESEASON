@@ -20,7 +20,8 @@ public class Robot extends IterativeRobot{
             mCheesyDriveHelper.cheesyDrive(
             OI.getInstance().getForward(),
             OI.getInstance().getLeft(),
-            false, false)
+            OI.getInstance().getQuickTurn()
+            , false)
         );
     }
 
