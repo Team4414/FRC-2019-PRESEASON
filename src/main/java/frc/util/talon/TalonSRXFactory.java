@@ -3,6 +3,7 @@ package frc.util.talon;
 import com.ctre.phoenix.ParamEnum;
 import com.ctre.phoenix.motorcontrol.ControlFrame;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.IMotorController;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -80,9 +81,11 @@ public class TalonSRXFactory {
         return talon;
     }
 
-    public static VictorSPX createPermanentSlaveVictor(int id, int master_id){
+    public static VictorSPX createPermanentSlaveVictor(int id, IMotorController master){
         final VictorSPX victor = new VictorSPX(id);
-        victor.set(ControlMode.Follower, master_id);
+        victor.clearStickyFaults(kTimeoutMs);
+
+        victor.follow(master);
         return victor;
     }
     
