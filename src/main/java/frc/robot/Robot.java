@@ -33,5 +33,6 @@ public class Robot extends IterativeRobot{
     @Override
     public void disabledInit() {
         CSVLogger.logCSV("logs/DriveLog", Drivetrain.driveLogger.get());
+    }
 
 }
