@@ -28,6 +28,13 @@ public class CSVLogger {
      * @return True if operation is successful. False if operation has failed.
      */
     public static boolean logCSV(String fileName, Log input){
+
+        //Make sure Log is not empty
+        if (input.asArray().length == 0){
+            System.out.println("!!!!!!!!!! Attempted to publish empty Log to CSV !!!!!!!!!!");
+            return false;
+        }
+        
         //Grab the row-major data from the Log, flip it to column-major, and store it as an array
         Object[][] data = flipArray(input.asArray());
 
