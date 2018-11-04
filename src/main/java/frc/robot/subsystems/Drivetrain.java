@@ -67,6 +67,14 @@ public class Drivetrain extends Subsystem{
         return (mRightMaster.getSelectedSensorPosition() - mRightZeroOffset);
     }
 
+    public int getLeftSensorVelocity(){
+        return mLeftMaster.getSelectedSensorVelocity();
+    }
+
+    public int getRightSensorVelocity(){
+        return mRightMaster.getSelectedSensorVelocity();
+    }
+
     private void setupLogger(){
         driveLogger = new Loggable(){
             @Override
