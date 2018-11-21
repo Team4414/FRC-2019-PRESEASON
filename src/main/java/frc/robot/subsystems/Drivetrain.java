@@ -11,6 +11,9 @@ import frc.util.talon.TalonSRXFactory;
 
 public class Drivetrain extends Subsystem{
 
+    private static final int kPIDidx = 0;
+    private static final int kCTRETimeout = 0; //no error reporting
+
     private static Drivetrain instance;
     public static Drivetrain getInstance(){
         if(instance == null)
@@ -36,8 +39,15 @@ public class Drivetrain extends Subsystem{
         mRightSlaveA = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveA, mRightMaster);
         mRightSlaveB = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveB, mRightMaster);
 
-        mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-        mRightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx, kCTRETimeout);
+        mRightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx,kCTRETimeout);
+
+        mLeftMaster.setSensorPhase(true);
+        mRightMaster.setSensorPhase(true);
+
+        mRightMaster.setInverted(true);
+        mRightSlaveA.setInverted(true);
+        mRightSlaveB.setInverted(true);
 
         setupLogger();
     }
@@ -55,24 +65,24 @@ public class Drivetrain extends Subsystem{
     }
 
     public void zeroSensor(){
-        mLeftZeroOffset = mLeftMaster.getSelectedSensorPosition();
-        mRightZeroOffset = mRightMaster.getSelectedSensorPosition();
+        mLeftZeroOffset = mLeftMaster.getSelectedSensorPosition(kPIDidx);
+        mRightZeroOffset = mRightMaster.getSelectedSensorPosition(kPIDidx);
     }
 
     public int getLeftSensorPosition(){
-        return (mLeftMaster.getSelectedSensorPosition() - mLeftZeroOffset);
+        return (mLeftMaster.getSelectedSensorPosition(kPIDidx) - mLeftZeroOffset);
     }
 
     public int getRightSensorPosition(){
-        return (mRightMaster.getSelectedSensorPosition() - mRightZeroOffset);
+        return (mRightMaster.getSelectedSensorPosition(kPIDidx) - mRightZeroOffset);
     }
 
     public int getLeftSensorVelocity(){
-        return mLeftMaster.getSelectedSensorVelocity();
+        return mLeftMaster.getSelectedSensorVelocity(kPIDidx);
     }
 
     public int getRightSensorVelocity(){
-        return mRightMaster.getSelectedSensorVelocity();
+        return mRightMaster.getSelectedSensorVelocity(kPIDidx);
     }
 
     private void setupLogger(){

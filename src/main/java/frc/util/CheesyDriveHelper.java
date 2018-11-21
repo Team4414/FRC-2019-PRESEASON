@@ -22,10 +22,10 @@ public class CheesyDriveHelper {
     private static final double kLowNegInertiaCloseScalar = 4.0;
     private static final double kLowNegInertiaFarScalar = 5.0;
 
-    private static final double kHighSensitivity = 0.65;
-    private static final double kLowSensitiity = 0.65;
+    private static final double kHighSensitivity = 0.95;
+    private static final double kLowSensitiity = 1.3;
 
-    private static final double kQuickStopDeadband = 0.5;
+    private static final double kQuickStopDeadband = 0.2;
     private static final double kQuickStopWeight = 0.1;
     private static final double kQuickStopScalar = 5.0;
 
@@ -34,7 +34,7 @@ public class CheesyDriveHelper {
     private double mNegInertiaAccumlator = 0.0;
 
     public double[] cheesyDrive(double throttle, double wheel, boolean isQuickTurn,
-                                   boolean isHighGear) {
+            boolean isHighGear) {
 
         wheel = handleDeadband(wheel, kWheelDeadband);
         throttle = handleDeadband(throttle, kThrottleDeadband);
@@ -101,7 +101,7 @@ public class CheesyDriveHelper {
             if (Math.abs(linearPower) < kQuickStopDeadband) {
                 double alpha = kQuickStopWeight;
                 mQuickStopAccumlator = (1 - alpha) * mQuickStopAccumlator
-                        + alpha * Math.min(1.0, Math.max(1.0, wheel)) * kQuickStopScalar;
+                        + alpha * wheel * kQuickStopScalar;
             }
             overPower = 1.0;
             angularPower = wheel;

@@ -14,7 +14,7 @@ public class CSVLogger {
     /**
      * The path to a directory where the logged csv files are to be stored in the filesystem.
      */
-    private static final String FILE_PATH = "csv/";
+    private static final String FILE_PATH = "\\home\\lvuser\\csv\\";
 
     /**
      * Log CSV Method.
@@ -30,7 +30,9 @@ public class CSVLogger {
     public static boolean logCSV(String fileName, Log input){
 
         //Make sure Log is not empty
-        if (input.asArray().length == 0){
+        try{
+            int tVal = input.asArray().length;
+        }catch(Exception e){
             System.out.println("!!!!!!!!!! Attempted to publish empty Log to CSV !!!!!!!!!!");
             return false;
         }
@@ -100,7 +102,7 @@ public class CSVLogger {
         PrintWriter fileWriter;
 
         try {
-            fileWriter = new PrintWriter(new File(FILE_PATH + fileName + ".csv"));
+            fileWriter = new PrintWriter(FILE_PATH + fileName + ".csv");
         } catch (FileNotFoundException e){
             System.err.println("!!!!! FILE NOT FOUND EXCEPTION FOR \"" + fileName + "\" !!!!!");
             return false;

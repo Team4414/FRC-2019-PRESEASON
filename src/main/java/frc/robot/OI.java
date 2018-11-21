@@ -14,29 +14,33 @@ public class OI{
     private static final int kThrottleNubID = 1;
     private static final int kTurnNubID = 0;
 
-    private static final int kTurnAxis = 0;
+    private static final int kXbox = 2;
+
+    private static final int kTurnAxis = 4;
     private static final int kThrottleAxis = 1;
 
-    private static final int kQuickTurnButtonID = 11;
+    private static final int kQuickTurnButtonID = 6;
 
 
     private Joystick throttleNub;
     private Joystick turnNub;
+    private Joystick xbox;
      
     private OI(){
-        throttleNub = new Joystick(kThrottleNubID);
-        turnNub = new Joystick(kTurnNubID);
+        //throttleNub = new Joystick(kThrottleNubID);
+        //turnNub = new Joystick(kTurnNubID);
+        xbox = new Joystick(kXbox);
     }
 
     public double getLeft(){
-        return turnNub.getRawAxis(kTurnAxis);
+        return xbox.getRawAxis(kTurnAxis);
     }
 
     public double getForward(){
-        return throttleNub.getRawAxis(kThrottleAxis);
+        return -xbox.getRawAxis(kThrottleAxis);
     }
 
     public boolean getQuickTurn(){
-        return turnNub.getRawButton(kQuickTurnButtonID);
+        return xbox.getRawButton(kQuickTurnButtonID);
     }
 }
