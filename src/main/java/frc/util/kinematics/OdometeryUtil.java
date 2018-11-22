@@ -6,7 +6,7 @@ package frc.util.kinematics;
  * 
  * @author Avidh Bavkar <avidh@team4414.com>
  */
-public abstract class ForwardKinematics {
+public abstract class OdometeryUtil{
     /**
     * Radius of the drive wheels
     */
@@ -37,7 +37,7 @@ public abstract class ForwardKinematics {
     * @param wheelRadius Radius of the drive wheels.
     * @param wheelBaseLength Distance between the centers of both wheels.
     */
-   public ForwardKinematics(double wheelRadius, double wheelBaseLength, double timestep){
+   public OdometeryUtil(double wheelRadius, double wheelBaseLength, double timestep){
        kRadius = wheelRadius;
        kWheelBase = wheelBaseLength;
        kTimeStep = timestep;
@@ -51,7 +51,7 @@ public abstract class ForwardKinematics {
     * @param yPos Initial Y Position of the Robot.
     * @param heading Initial Heading of the Robot.
     */
-   public ForwardKinematics(double wheelRadius, double wheelBaseLength, double timestep, double xPos, double yPos, double heading){
+   public OdometeryUtil(double wheelRadius, double wheelBaseLength, double timestep, double xPos, double yPos, double heading){
        this(wheelRadius, wheelBaseLength, timestep);
        mXpos = xPos;
        mYpos = yPos;
@@ -64,8 +64,9 @@ public abstract class ForwardKinematics {
     */
    public void update(){
        mXpos += kTimeStep * getDeltaX();
+       System.out.println(getDeltaX() + " | " + getDeltaY() + " | " + getInputHeading());
        mYpos += kTimeStep * getDeltaY();
-       mHeading += kTimeStep * getDeltaHeading();
+       mHeading = getInputHeading();
    }
     /**
     * Get X Position Method.
@@ -78,11 +79,6 @@ public abstract class ForwardKinematics {
     */
    public double getYPosition(){ return mYpos; }
     /**
-    * Get Heading Method.
-    * @return The current heading of the robot.
-    */
-   public double getHeading(){ return mHeading; }
-    /**
     * Get Delta X Method.
     *
     * Calculates the change in the X Position of the Robot with respect to wheel velocities and heading.
@@ -91,7 +87,7 @@ public abstract class ForwardKinematics {
     */
    private double getDeltaX(){
        //Check this link for the equations:
-       return (kRadius/2) * (getLeftWheelVelocity() + getRightWheelVelocity()) * Math.cos(mHeading);
+       return ((getLeftWheelVelocity() + getRightWheelVelocity())/2) * Math.cos((mHeading/360) * (2*Math.PI));
    }
     /**
     * Get Delta Y Method.
@@ -101,17 +97,7 @@ public abstract class ForwardKinematics {
     * @return The change in Y Position.
     */
    private double getDeltaY(){
-       return (kRadius/2) * (getLeftWheelVelocity() + getRightWheelVelocity()) * Math.sin(mHeading);
-   }
-    /**
-    * Get Delta Heading Method.
-    *
-    * Calculates the change in the Heading of the Robot with respect to wheel velocities.
-    *
-    * @return The change in heading.
-    */
-   private double getDeltaHeading(){
-       return (kRadius/kWheelBase) * (getRightWheelVelocity() - getLeftWheelVelocity());
+       return ((getLeftWheelVelocity() + getRightWheelVelocity())/2) * Math.sin((mHeading/360) * (2*Math.PI));
    }
     /**
     * Get Left Wheel Velocity Method.
@@ -125,4 +111,11 @@ public abstract class ForwardKinematics {
     * @return The current measured velocity of the right wheel.
     */
    protected abstract double getRightWheelVelocity();
+
+   /**
+    * Get Heading Method.
+
+    * @return The measured Heading of the robot.
+    */
+   protected abstract double getInputHeading();
 }

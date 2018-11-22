@@ -4,7 +4,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.sensors.PigeonIMU;
+
 import edu.wpi.first.wpilibj.command.Subsystem;
+import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.util.logging.Loggable;
 import frc.util.talon.TalonSRXFactory;
@@ -27,8 +30,11 @@ public class Drivetrain extends Subsystem{
 
     private VictorSPX mLeftSlaveA, mLeftSlaveB, mRightSlaveA, mRightSlaveB;
 
+    private PigeonIMU mGyro;
+
     private int mLeftZeroOffset = 0;
     private int mRightZeroOffset = 0;
+    private double mGyroOffset = 0;
 
     private Drivetrain(){
         mLeftMaster = TalonSRXFactory.createDefaultTalon(RobotMap.DrivetrainMap.kLeftMaster);
@@ -38,6 +44,8 @@ public class Drivetrain extends Subsystem{
         mRightMaster = TalonSRXFactory.createDefaultTalon(RobotMap.DrivetrainMap.kRightMaster);
         mRightSlaveA = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveA, mRightMaster);
         mRightSlaveB = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveB, mRightMaster);
+
+        mGyro = new PigeonIMU(0);
 
         mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx, kCTRETimeout);
         mRightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx,kCTRETimeout);
@@ -67,22 +75,39 @@ public class Drivetrain extends Subsystem{
     public void zeroSensor(){
         mLeftZeroOffset = mLeftMaster.getSelectedSensorPosition(kPIDidx);
         mRightZeroOffset = mRightMaster.getSelectedSensorPosition(kPIDidx);
+        mGyroOffset = mGyro.getFusedHeading();
     }
 
-    public int getLeftSensorPosition(){
-        return (mLeftMaster.getSelectedSensorPosition(kPIDidx) - mLeftZeroOffset);
+    public double getGyroAngle(){
+        return mGyro.getFusedHeading() - mGyroOffset;
     }
 
-    public int getRightSensorPosition(){
-        return (mRightMaster.getSelectedSensorPosition(kPIDidx) - mRightZeroOffset);
+    /**
+     * @return Left Sensor Position in Feet
+     */
+    public double getLeftSensorPosition(){
+        return Constants.kTicks2Feet * (mLeftMaster.getSelectedSensorPosition(kPIDidx) - mLeftZeroOffset);
     }
 
-    public int getLeftSensorVelocity(){
-        return mLeftMaster.getSelectedSensorVelocity(kPIDidx);
+    /**
+     * @return Right Sensor Position in Feet
+     */
+    public double getRightSensorPosition(){
+        return Constants.kTicks2Feet * (mRightMaster.getSelectedSensorPosition(kPIDidx) - mRightZeroOffset);
     }
 
-    public int getRightSensorVelocity(){
-        return mRightMaster.getSelectedSensorVelocity(kPIDidx);
+    /**
+     * @return Left Sensor Velocity in Feet per Second
+     */
+    public double getLeftSensorVelocity(){
+        return Constants.kNativeU2FPS * mLeftMaster.getSelectedSensorVelocity(kPIDidx);
+    }
+
+    /**
+     * @return Left Sensor Velocity in Feet per Second
+     */
+    public double getRightSensorVelocity(){
+        return Constants.kTicks2Feet * mRightMaster.getSelectedSensorVelocity(kPIDidx);
     }
 
     private void setupLogger(){

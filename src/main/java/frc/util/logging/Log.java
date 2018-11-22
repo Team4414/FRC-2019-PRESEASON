@@ -25,7 +25,7 @@ public class Log {
      * Default Constructor.
      */
     public Log(){
-        contents = new LinkedHashMap<>();
+        clear();
     }
 
     /**
@@ -109,5 +109,9 @@ public class Log {
         for (int i = 0; i < obj.length; i++)
             returnMe[i] = obj[i].toString();
         return returnMe;
+    }
+
+    public void clear(){
+        contents = new LinkedHashMap<>();
     }
 }

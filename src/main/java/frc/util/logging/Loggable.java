@@ -63,4 +63,7 @@ public abstract class Loggable {
         return new Log(log);
     }
 
+    public void clearLog(){
+        log.clear();
+    }
 }

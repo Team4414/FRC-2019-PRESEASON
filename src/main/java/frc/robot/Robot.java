@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.auton.Kinematic;
 import frc.robot.subsystems.Drivetrain;
 import frc.util.CheesyDriveHelper;
@@ -21,14 +22,14 @@ public class Robot extends IterativeRobot{;
 
     @Override
     public void autonomousInit() {
-        mLocalizer = new Notifier(new Kinematic(mMasterPos, kLocalizerTimestep));
         mLocalizer.startPeriodic(kLocalizerTimestep);
     }
 
     @Override
     public void robotInit(){
-        Drivetrain.getInstance();
+        Drivetrain.getInstance().zeroSensor();
         setupLogger();
+        mLocalizer = new Notifier(new Kinematic(mMasterPos, kLocalizerTimestep));
     }
     
     @Override
@@ -56,8 +57,17 @@ public class Robot extends IterativeRobot{;
 
     @Override
     public void disabledInit() {
-        CSVLogger.logCSV("logs\\DriveLog", Drivetrain.driveLogger.get());
-        CSVLogger.logCSV("logs\\PosLog", mPositionLog.get());
+        CSVLogger.logCSV("logs/DriveLog", Drivetrain.driveLogger.get());
+        CSVLogger.logCSV("logs/PosLog", mPositionLog.get());
+
+        Drivetrain.driveLogger.clearLog();
+        mPositionLog.clearLog();
+
+        mLocalizer.stop();
+    }
+
+    @Override
+    public void testInit(){
     }
 
     private void setupLogger(){
@@ -65,6 +75,7 @@ public class Robot extends IterativeRobot{;
             @Override
             protected LogObject[] collectData() {
                 return new LogObject[]{
+                    new LogObject("Time", Timer.getFPGATimestamp()),
                     new LogObject("XPos", mMasterPos.getX()),
                     new LogObject("YPos", mMasterPos.getY()),
                 };

@@ -14,8 +14,7 @@ public class CSVLogger {
     /**
      * The path to a directory where the logged csv files are to be stored in the filesystem.
      */
-    private static final String FILE_PATH = "\\home\\lvuser\\csv\\";
-
+    private static final String FILE_PATH = "/U/";
     /**
      * Log CSV Method.
      *
@@ -101,10 +100,15 @@ public class CSVLogger {
 
         PrintWriter fileWriter;
 
+        File tmpFile = new File(FILE_PATH + fileName + ".csv");
+        if (tmpFile.exists()){
+            tmpFile.delete();
+        }
+
         try {
             fileWriter = new PrintWriter(FILE_PATH + fileName + ".csv");
         } catch (FileNotFoundException e){
-            System.err.println("!!!!! FILE NOT FOUND EXCEPTION FOR \"" + fileName + "\" !!!!!");
+            System.err.println("!!!!! FILE NOT FOUND EXCEPTION FOR \"" + FILE_PATH + fileName + "\" !!!!!");
             return false;
         }
 

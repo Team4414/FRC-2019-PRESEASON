@@ -1,18 +1,19 @@
 package frc.robot.auton;
 
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
-import frc.util.kinematics.ForwardKinematics;
+import frc.util.kinematics.OdometeryUtil;
 import frc.util.kinematics.RobotPos;
 
 public class Kinematic implements Runnable{
 
-    private static final double kWheelRadius = 1;
-    private static final double kWheelBase = 1;
+    private static final double kWheelRadius = Constants.kWheelRadius;
+    private static final double kWheelBase = Constants.kWheelBase;
 
-    private ForwardKinematics kine;
+    private OdometeryUtil kine;
 
-    private class DriveKinematics extends ForwardKinematics{
+    private class DriveKinematics extends OdometeryUtil{
 
         //DriveKinematics is an implementation of ForwardKinematics
 
@@ -30,6 +31,11 @@ public class Kinematic implements Runnable{
             return Drivetrain.getInstance().getRightSensorVelocity();
         }
 
+        @Override
+        protected double getInputHeading(){
+            return Drivetrain.getInstance().getGyroAngle();
+        }
+
     }
 
     public Kinematic(RobotPos initialPos, double timestep){
@@ -40,6 +46,6 @@ public class Kinematic implements Runnable{
     public void run() {
         kine.update();
 
-        Robot.mMasterPos = new RobotPos(kine.getXPosition(), kine.getXPosition(), kine.getHeading()); 
+        Robot.mMasterPos = new RobotPos(kine.getXPosition(), kine.getYPosition(), Drivetrain.getInstance().getGyroAngle()); 
     }
 }
