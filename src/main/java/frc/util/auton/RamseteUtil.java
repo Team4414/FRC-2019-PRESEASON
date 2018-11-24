@@ -19,7 +19,7 @@ import jaci.pathfinder.Trajectory;
  * @author Avidh Bavkar [avidh@team4414.com]
  * @author JJ Sessa [jonathan@team4414.com]
  */
-public abstract class Ramsete {
+public abstract class RamseteUtil {
 
     private final double kTimestep;
     private static final double kZeta = 0.01;
@@ -119,7 +119,7 @@ public abstract class Ramsete {
 
     private final double kWheelBase;
 
-    public Ramsete(double wheelBase, double timeStep){
+    public RamseteUtil(double wheelBase, double timeStep){
         mSegCount = -1; //-1 used as an invalid number
         mPos = getRobotPos();
         kWheelBase = wheelBase;

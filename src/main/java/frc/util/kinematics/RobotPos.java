@@ -72,4 +72,34 @@ public class RobotPos{
     public double getHeading(){
         return heading;
     }
+
+    /**
+     * Add Method
+     * 
+     * <p>Accepts a {@link Deltas} and modifies the position accordingly
+     * 
+     * @param delta the delta used to modify the position.
+     */
+    public void add(Deltas delta){
+        x += delta.getX();
+        y += delta.getY();
+        heading = delta.getHeading();
+    }
+
+    /**
+     * Deltas Constructor
+     * 
+     * @param dX the change in X Position
+     * @param dY the change in Y Position
+     * @param absHeading the absolute Heading. (NOT a Delta!)
+     */
+    public static class Deltas extends RobotPos{
+        public Deltas(double dX, double dY, double absHeading){
+            super(dX, dY, absHeading);
+        }
+
+        public Deltas(Deltas clone){
+            super(clone);
+        }
+    }
 }

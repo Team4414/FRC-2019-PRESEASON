@@ -1,20 +1,41 @@
 package frc.robot.auton;
 
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
-import frc.util.auton.Ramsete;
+import frc.util.auton.RamseteUtil;
 import frc.util.kinematics.RobotPos;
 import frc.util.logging.Loggable;
 
-public class AutonController extends Ramsete implements Runnable{
+public class Ramsete extends RamseteUtil implements Runnable{
+
+    private static Ramsete instance;
+    public static Ramsete getInstance(){
+        if (instance == null)
+            instance = new Ramsete(Robot.kRamseteTimestep);
+        return instance;
+    }
+
+    private Notifier mNotifier;
 
     public Loggable mPathLogger;
+    private final double kTimestep;
 
-    public AutonController(double timestep){
+    public Ramsete(double timestep){
         super(Constants.kWheelBase, timestep);
+        mNotifier = new Notifier(this);
         setupLogger();
+        kTimestep = timestep;
+    }
+
+    public void start(){
+        mNotifier.startPeriodic(kTimestep);
+    }
+
+    public void stop(){
+        mNotifier.stop();
     }
 
     @Override

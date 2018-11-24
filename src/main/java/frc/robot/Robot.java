@@ -5,7 +5,8 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.auton.AutonController;
-import frc.robot.auton.Kinematic;
+import frc.robot.auton.Odometery;
+import frc.robot.auton.Ramsete;
 import frc.robot.subsystems.Drivetrain;
 import frc.util.CheesyDriveHelper;
 import frc.util.kinematics.RobotPos;
@@ -25,56 +26,51 @@ public class Robot extends IterativeRobot{;
     public static final double kLoggingTimestep = 0.1;
     public static final double kRamseteTimestep = 0.01;
 
-    private AutonController mRamsete;
-    private Kinematic mKinematic;
-
-    private Notifier mLocalizer;
     private Notifier mLogger;
-    private Notifier mAutonController;
 
     private Trajectory autonTraj;
 
     @Override
     public void robotInit(){
         Drivetrain.getInstance().zeroSensor();
+
         setupLogger();
 
-        mKinematic = new Kinematic(mMasterPos, kLocalizerTimestep); 
-        mLocalizer = new Notifier(mKinematic);
+        //verify both Odometery and Ramsete are constructed
+        Odometery.getInstance();
+        Ramsete.getInstance();
+        
         mLogger = new Notifier( new Runnable(){
         
             @Override
             public void run() {
                 CSVLogger.logCSV("logs/DriveLog", Drivetrain.driveLogger.get());
                 CSVLogger.logCSV("logs/PosLog", mPositionLog.get());
-                CSVLogger.logCSV("logs/PathLog", mRamsete.mPathLogger.get());
+                CSVLogger.logCSV("logs/PathLog", Ramsete.getInstance().mPathLogger.get());
             }
         });
-
-        mRamsete = new AutonController(kRamseteTimestep);
-
-        mAutonController = new Notifier(mRamsete);
 
         mLogger.startPeriodic(kLoggingTimestep);
 
         CameraServer.getInstance().startAutomaticCapture();
 
-        autonTraj = getTrajFromFile("");
+        autonTraj = getTrajFromFile();
     }
 
     @Override
     public void autonomousInit() {
-        mLocalizer.startPeriodic(kLocalizerTimestep);
-        mAutonController.startPeriodic(kRamseteTimestep);
-        mMasterPos = new RobotPos(0, 0, 0);
-        mKinematic.updatePos(new RobotPos(0,0,0));
 
-        mRamsete.trackPath(autonTraj);
+        mMasterPos = new RobotPos(0, 0, 0);
+
+        Odometery.getInstance().start();
+        Ramsete.getInstance().start();
+
+        Ramsete.getInstance().trackPath(autonTraj);
     }
     
     @Override
     public void teleopInit(){
-        mLocalizer.startPeriodic(kLocalizerTimestep);
+        Odometery.getInstance().start();
     }
 
     @Override
@@ -95,18 +91,14 @@ public class Robot extends IterativeRobot{;
 
     @Override
     public void disabledInit() {
-        CSVLogger.logCSV("logs/DriveLog", Drivetrain.driveLogger.get());
-        CSVLogger.logCSV("logs/PosLog", mPositionLog.get());
+
+        mLogger.stop();
 
         Drivetrain.driveLogger.clearLog();
         mPositionLog.clearLog();
 
-        mLocalizer.stop();
-        mAutonController.stop();
-    }
-
-    @Override
-    public void testInit(){
+        Odometery.getInstance().stop();
+        Ramsete.getInstance().stop();
     }
 
     private void setupLogger(){
@@ -125,7 +117,7 @@ public class Robot extends IterativeRobot{;
     }
 
 
-    private Trajectory getTrajFromFile(String file){
+    private Trajectory getTrajFromFile(){
         // return Pathfinder.readFromCSV(new File(file));
         Waypoint[] points = new Waypoint[] {
 
