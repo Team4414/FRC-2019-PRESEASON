@@ -45,6 +45,9 @@ public class Drivetrain extends Subsystem{
         mRightSlaveA = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveA, mRightMaster);
         mRightSlaveB = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveB, mRightMaster);
 
+        mLeftMaster.configOpenloopRamp(0.01, kCTRETimeout);
+        mRightMaster.configOpenloopRamp(0.01, kCTRETimeout);
+
         mGyro = new PigeonIMU(0);
 
         mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx, kCTRETimeout);
@@ -70,6 +73,13 @@ public class Drivetrain extends Subsystem{
 
     public void setRawSpeed(double[] speeds){
         setRawSpeed(speeds[0], speeds[1]);
+    }
+
+    public void setVelocity(double left, double right){
+        setRawSpeed(
+            left  / 12.2 * (10.0 / 12),
+            right / 12.2 * (10.0 / 12)
+        );
     }
 
     public void zeroSensor(){
@@ -107,7 +117,7 @@ public class Drivetrain extends Subsystem{
      * @return Left Sensor Velocity in Feet per Second
      */
     public double getRightSensorVelocity(){
-        return Constants.kTicks2Feet * mRightMaster.getSelectedSensorVelocity(kPIDidx);
+        return Constants.kNativeU2FPS * mRightMaster.getSelectedSensorVelocity(kPIDidx);
     }
 
     private void setupLogger(){
@@ -115,8 +125,8 @@ public class Drivetrain extends Subsystem{
             @Override
             protected LogObject[] collectData() {
                 return new LogObject[]{
-                    new LogObject("LeftMasterCurrent", mLeftMaster.getOutputCurrent()),
-                    new LogObject("RightMasterCurrent", mRightMaster.getOutputCurrent()),
+                    new LogObject("LeftVel",  getLeftSensorVelocity()),
+                    new LogObject("RightVel", getRightSensorVelocity())
                 };
             }
         };

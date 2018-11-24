@@ -45,7 +45,13 @@ public class Kinematic implements Runnable{
     @Override
     public void run() {
         kine.update();
+        // System.out.println("Kine Running");
 
-        Robot.mMasterPos = new RobotPos(kine.getXPosition(), kine.getYPosition(), Drivetrain.getInstance().getGyroAngle()); 
+        Robot.mMasterPos = new RobotPos(kine.getXPosition(), kine.getYPosition(), Drivetrain.getInstance().getGyroAngle());
+        Robot.mPositionLog.log();
+    }
+
+    public void updatePos(RobotPos pos){
+        kine.setPos(pos);
     }
 }

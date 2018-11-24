@@ -36,6 +36,15 @@ public class RobotPos{
     }
 
     /**
+     * RobotPos Constructor
+     * 
+     * @param clone The RobotPos object to be cloned
+     */
+    public RobotPos(RobotPos clone){
+        this(clone.x, clone.y, clone.heading);
+    }
+
+    /**
      * Get X Method.
      * 
      * @return The X Position of the Robot

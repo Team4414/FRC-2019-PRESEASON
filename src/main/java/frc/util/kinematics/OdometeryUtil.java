@@ -64,9 +64,14 @@ public abstract class OdometeryUtil{
     */
    public void update(){
        mXpos += kTimeStep * getDeltaX();
-       System.out.println(getDeltaX() + " | " + getDeltaY() + " | " + getInputHeading());
        mYpos += kTimeStep * getDeltaY();
        mHeading = getInputHeading();
+   }
+
+   public void setPos(RobotPos pos){
+       mXpos = pos.getX();
+       mYpos = pos.getY();
+       mHeading = pos.getHeading();
    }
     /**
     * Get X Position Method.

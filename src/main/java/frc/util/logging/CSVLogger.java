@@ -32,7 +32,7 @@ public class CSVLogger {
         try{
             int tVal = input.asArray().length;
         }catch(Exception e){
-            System.out.println("!!!!!!!!!! Attempted to publish empty Log to CSV !!!!!!!!!!");
+            // System.out.println("!!!!!!!!!! Attempted to publish empty Log to CSV !!!!!!!!!!");
             return false;
         }
         
