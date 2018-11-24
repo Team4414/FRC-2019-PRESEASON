@@ -9,10 +9,13 @@ import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
+import frc.util.kinematics.pos.Pose2d;
 import frc.util.logging.Loggable;
 import frc.util.talon.TalonSRXFactory;
 
 public class Drivetrain extends Subsystem{
+
+    public static Pose2d masterPos;
 
     private static final int kPIDidx = 0;
     private static final int kCTRETimeout = 0; //no error reporting
