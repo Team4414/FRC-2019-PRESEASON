@@ -6,7 +6,7 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 import frc.util.auton.RamseteUtil;
-import frc.util.kinematics.RobotPos;
+import frc.util.kinematics.pos.Pose2d;
 import frc.util.logging.Loggable;
 
 public class Ramsete extends RamseteUtil implements Runnable{
@@ -39,9 +39,9 @@ public class Ramsete extends RamseteUtil implements Runnable{
     }
 
     @Override
-    public RobotPos getRobotPos() {
-        return new RobotPos(Robot.mMasterPos);
-	}
+    public Pose2d getPose2d(){
+        return Drivetrain.masterPos;
+    }
 
     @Override
     public void run() {
@@ -58,13 +58,11 @@ public class Ramsete extends RamseteUtil implements Runnable{
                 return new LogObject[]{
                     new LogObject("Time", Timer.getFPGATimestamp()),
                     new LogObject("Type", "P"),
-                    new LogObject("X Pos", mGoal.getPos().getX()),
-                    new LogObject("Y Pos", mGoal.getPos().getY()),
-                    new LogObject("Heading", mGoal.getPos().getHeading())
+                    new LogObject("X Pos", mGoal.getPos().getTranslation().x()),
+                    new LogObject("Y Pos", mGoal.getPos().getTranslation().y()),
+                    new LogObject("Heading", mGoal.getPos().getRotation().getRadians())
                 };
             }
         };
     }
-
-
 }

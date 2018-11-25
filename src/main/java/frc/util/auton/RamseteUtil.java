@@ -164,7 +164,8 @@ public abstract class RamseteUtil {
             mPos.getRotation()
         );
 
-        mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(mGoal.getPos().getRotation().getRadians() - mPos.getRotation().getRadians()));
+        mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(Pathfinder.r2d(mGoal.getPos().getRotation().getRadians() - 
+                      mPos.getRotation().getRadians())));
 
         //Constant Equation from the paper.
         mConstant = 2.0 * kZeta *
@@ -173,8 +174,9 @@ public abstract class RamseteUtil {
 
         //Eq. 5.12!
         ramv =  path.get(mSegCount).velocity * Math.cos(mAngleError) +
-                mConstant * (Math.cos(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x()()) +
-                Math.sin(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y());
+                mConstant * (Math.cos(mPos.getRotation().getRadians())) * 
+                (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x() +
+                Math.sin(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y()));
 
         ramw =  mGoal.getDeriv().getRotation().getRadians() + kB * path.get(mSegCount).velocity *
                 (Math.sin(mAngleError) / (mAngleError)) * (Math.cos(mPos.getRotation().getRadians()) *
