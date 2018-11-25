@@ -3,6 +3,7 @@ package frc.robot.auton;
 import edu.wpi.first.wpilibj.Notifier;
 import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
+import frc.util.kinematics.pos.Rotation2d;
 import frc.util.kinematics.pos.Twist2d;
 
 public class Odometery implements Runnable{
@@ -35,7 +36,7 @@ public class Odometery implements Runnable{
         Drivetrain.masterPos.transformBy(Twist2d.fromWheels(
             getLeftWheelVelocity() * kTimestep,
             getRightWheelVelocity() *kTimestep, 
-            getHeading()));
+            getHeading().getRadians()));
         Robot.mPositionLog.log();
     }
 
@@ -47,7 +48,7 @@ public class Odometery implements Runnable{
         return Drivetrain.getInstance().getRightSensorVelocity();
     }
 
-    protected double getHeading(){
+    protected Rotation2d getHeading(){
         return Drivetrain.getInstance().getGyroAngle();
     }
 }

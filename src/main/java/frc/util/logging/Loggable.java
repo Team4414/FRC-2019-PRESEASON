@@ -6,6 +6,8 @@ package frc.util.logging;
  */
 public abstract class Loggable {
 
+    public String kFilePath;
+
     public class LogObject{
         public String key;
         public Object data;
@@ -26,9 +28,18 @@ public abstract class Loggable {
      *
      * @param keys The labels to the data in the order that they will be passed in on "collectData()".
      */
-    public Loggable(){
+    public Loggable(String logFilePath){
         log = new Log();
+        kFilePath = logFilePath;
     }
+
+    /**
+     * Constructor
+     */
+    public Loggable(){
+        this(null);
+    }
+
 
     /**
      * Collect Data Abstract Method.

@@ -7,9 +7,10 @@ import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 import frc.util.auton.RamseteUtil;
 import frc.util.kinematics.pos.Pose2d;
+import frc.util.logging.ILoggable;
 import frc.util.logging.Loggable;
 
-public class Ramsete extends RamseteUtil implements Runnable{
+public class Ramsete extends RamseteUtil implements Runnable, ILoggable{
 
     private static Ramsete instance;
     public static Ramsete getInstance(){
@@ -20,7 +21,6 @@ public class Ramsete extends RamseteUtil implements Runnable{
 
     private Notifier mNotifier;
 
-    public Loggable mPathLogger;
     private final double kTimestep;
 
     public Ramsete(double timestep){
@@ -48,11 +48,11 @@ public class Ramsete extends RamseteUtil implements Runnable{
         this.update();
 
         Drivetrain.getInstance().setVelocity(this.getVels().getLeft(), this.getVels().getRight());
-        mPathLogger.log();
     }
 
-    private void setupLogger(){
-        mPathLogger = new Loggable(){
+    @Override
+    public Loggable setupLogger(){
+        return new Loggable("PathLog"){
             @Override
             protected LogObject[] collectData() {
                 return new LogObject[]{

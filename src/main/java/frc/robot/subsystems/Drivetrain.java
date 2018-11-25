@@ -10,10 +10,12 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
 import frc.util.kinematics.pos.Pose2d;
+import frc.util.kinematics.pos.Rotation2d;
+import frc.util.logging.ILoggable;
 import frc.util.logging.Loggable;
 import frc.util.talon.TalonSRXFactory;
 
-public class Drivetrain extends Subsystem{
+public class Drivetrain extends Subsystem implements ILoggable{
 
     public static Pose2d masterPos;
 
@@ -26,8 +28,6 @@ public class Drivetrain extends Subsystem{
             instance = new Drivetrain();
         return instance;
     }
-
-    public static Loggable driveLogger;
 
     private TalonSRX mLeftMaster, mRightMaster;
 
@@ -91,8 +91,8 @@ public class Drivetrain extends Subsystem{
         mGyroOffset = mGyro.getFusedHeading();
     }
 
-    public double getGyroAngle(){
-        return mGyro.getFusedHeading() - mGyroOffset;
+    public Rotation2d getGyroAngle(){
+        return Rotation2d.fromDegrees(mGyro.getFusedHeading() - mGyroOffset);
     }
 
     /**
@@ -123,13 +123,19 @@ public class Drivetrain extends Subsystem{
         return Constants.kNativeU2FPS * mRightMaster.getSelectedSensorVelocity(kPIDidx);
     }
 
-    private void setupLogger(){
-        driveLogger = new Loggable(){
+    @Override
+    public Loggable setupLogger(){
+        return new Loggable("DriveLog"){
             @Override
             protected LogObject[] collectData() {
                 return new LogObject[]{
                     new LogObject("LeftVel",  getLeftSensorVelocity()),
-                    new LogObject("RightVel", getRightSensorVelocity())
+                    new LogObject("RightVel", getRightSensorVelocity()),
+
+                    new LogObject("Type", "R"),
+                    new LogObject("XPos", masterPos.getTranslation().x()),
+                    new LogObject("YPos", masterPos.getTranslation().y()),
+                    new LogObject("Heading", masterPos.getRotation().getRadians())
                 };
             }
         };
