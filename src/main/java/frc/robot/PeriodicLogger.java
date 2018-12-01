@@ -23,6 +23,7 @@ public class PeriodicLogger implements Runnable{
 
     private PeriodicLogger(){
         mNotifier = new Notifier(this);
+        allLogs = new ArrayList<Loggable>();
     }
 
     public static void addLoggable(ILoggable loggable){

@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.io.File;
+
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import frc.robot.auton.Odometery;
@@ -7,7 +9,6 @@ import frc.robot.auton.Ramsete;
 import frc.robot.subsystems.Drivetrain;
 import frc.util.CheesyDriveHelper;
 import frc.util.kinematics.pos.Pose2d;
-import frc.util.logging.Loggable;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
@@ -18,7 +19,7 @@ public class Robot extends IterativeRobot{;
 
     public static final double kLocalizerTimestep = 0.01;
     public static final double kLoggingTimestep = 0.1;
-    public static final double kRamseteTimestep = 0.01;
+    public static final double kRamseteTimestep = 0.05;
 
     private Trajectory autonTraj;
 
@@ -37,11 +38,14 @@ public class Robot extends IterativeRobot{;
 
         CameraServer.getInstance().startAutomaticCapture();
 
-        autonTraj = getTrajFromFile();
+        autonTraj = getTrajFromFile("/home/lvuser/autoPaths/TestPath_left_detailed.csv");
+
+        PeriodicLogger.getInstance().start();
     }
 
     @Override
     public void autonomousInit() {
+        intoEnabled();
 
         Drivetrain.masterPos = new Pose2d();
 
@@ -53,6 +57,7 @@ public class Robot extends IterativeRobot{;
     
     @Override
     public void teleopInit(){
+        intoEnabled();
         Odometery.getInstance().start();
     }
 
@@ -63,8 +68,9 @@ public class Robot extends IterativeRobot{;
             OI.getInstance().getForward(),
             OI.getInstance().getLeft(),
             OI.getInstance().getQuickTurn()
-            , false)
+            , true)
         );
+        System.out.println(OI.getInstance().getForward() + "\t|\t" + OI.getInstance().getLeft());
     }
 
     @Override
@@ -73,8 +79,8 @@ public class Robot extends IterativeRobot{;
 
     @Override
     public void disabledInit() {
-
         PeriodicLogger.getInstance().stop();
+        PeriodicLogger.allToCSV();
         PeriodicLogger.clearAll();
 
         Odometery.getInstance().stop();
@@ -82,24 +88,28 @@ public class Robot extends IterativeRobot{;
     }
 
 
-    private Trajectory getTrajFromFile(){
-        // return Pathfinder.readFromCSV(new File(file));
-        Waypoint[] points = new Waypoint[] {
+    private Trajectory getTrajFromFile(String file){
+        return Pathfinder.readFromCSV(new File(file));
+    //     Waypoint[] points = new Waypoint[] {
 
-            new Waypoint(0, 0, Pathfinder.d2r(0)), // Waypoint @ x=0, y=0, exit angle=0 radians						// angle=-45 degrees
-            new Waypoint(4, 4, Pathfinder.d2r(0)), // Waypoint @ x=-2, y=-2, exit angle=0 radians				// angle=-45 degrees
+    //         new Waypoint(0, 0, Pathfinder.d2r(0)), // Waypoint @ x=0, y=0, exit angle=0 radians						// angle=-45 degrees
+    //         new Waypoint(4, 4, Pathfinder.d2r(0)), // Waypoint @ x=-2, y=-2, exit angle=0 radians				// angle=-45 degrees
             
-        };
+    //     };
 
-        Trajectory.Config config;
-        Trajectory trajectory;
+    //     Trajectory.Config config;
+    //     Trajectory trajectory;
 
         
-        config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH,
-                kRamseteTimestep, 4, 4, 10000);
-        trajectory = Pathfinder.generate(points, config);
+    //     config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH,
+    //             kRamseteTimestep, 4, 4, 10000);
+    //     trajectory = Pathfinder.generate(points, config);
 
-        System.out.println(trajectory.length());
-        return trajectory;
+    //     System.out.println(trajectory.length());
+    //     return trajectory;
+    }
+
+    public void intoEnabled(){
+        PeriodicLogger.getInstance().start();
     }
 }

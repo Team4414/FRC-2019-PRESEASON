@@ -33,11 +33,11 @@ public class Odometery implements Runnable{
 
     @Override
     public void run() {
-        Drivetrain.masterPos.transformBy(Twist2d.fromWheels(
+        Drivetrain.getInstance();
+        Drivetrain.masterPos = Drivetrain.masterPos.transformBy(Twist2d.fromWheels(
             getLeftWheelVelocity() * kTimestep,
             getRightWheelVelocity() *kTimestep, 
             getHeading().getRadians()));
-        Robot.mPositionLog.log();
     }
 
     protected double getLeftWheelVelocity() {

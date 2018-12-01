@@ -112,8 +112,8 @@ public abstract class RamseteUtil {
 
     }
 
-    private Trajectory path;
-    private int mSegCount;
+    public Trajectory path;
+    public int mSegCount;
     public static Status status = Status.STANDBY;
 
     protected DifferentiablePose2d mGoal;
@@ -153,8 +153,8 @@ public abstract class RamseteUtil {
         //otherwise you are tracking so update your values.
         status = Status.TRACKING;
         mGoal.update(new Pose2d(
-                path.get(mSegCount).x * Constants.kFeet2Meters,
-                path.get(mSegCount).y * Constants.kFeet2Meters,
+                path.get(mSegCount).x,
+                path.get(mSegCount).y,
                 Rotation2d.fromRadians(path.get(mSegCount).heading)
         ));
         mPos = getPose2d();
@@ -163,6 +163,7 @@ public abstract class RamseteUtil {
             mPos.getTranslation().y(),
             mPos.getRotation()
         );
+
 
         mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(Pathfinder.r2d(mGoal.getPos().getRotation().getRadians() - 
                       mPos.getRotation().getRadians())));
@@ -182,6 +183,7 @@ public abstract class RamseteUtil {
                 (Math.sin(mAngleError) / (mAngleError)) * (Math.cos(mPos.getRotation().getRadians()) *
                 (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y()) - Math.sin(mPos.getRotation().getRadians()) *
                 (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x())) + mConstant * (mAngleError);
+
 
         mSegCount ++;
     }

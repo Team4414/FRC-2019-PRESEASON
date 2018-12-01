@@ -17,7 +17,7 @@ import frc.util.talon.TalonSRXFactory;
 
 public class Drivetrain extends Subsystem implements ILoggable{
 
-    public static Pose2d masterPos;
+    public static Pose2d masterPos = new Pose2d();
 
     private static final int kPIDidx = 0;
     private static final int kCTRETimeout = 0; //no error reporting

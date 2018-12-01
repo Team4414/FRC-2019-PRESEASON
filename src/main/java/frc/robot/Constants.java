@@ -11,6 +11,6 @@ public class Constants{
     public static final double kNativeU2FPS = kTicks2Feet * 10;
     public static final double kFPS2NativeU = 1/kNativeU2FPS;
 
-    public static final double kMeters2Feet = 3.28084;
-    public static final double kFeet2Meters = 1/kMeters2Feet;
+    // public static final double kMeters2Feet = 3.28084;
+    // public static final double kFeet2Meters = 1/kMeters2Feet;
 }
