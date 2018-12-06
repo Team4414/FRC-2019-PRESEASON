@@ -39,6 +39,11 @@ public class Drivetrain extends Subsystem implements ILoggable{
     private int mRightZeroOffset = 0;
     private double mGyroOffset = 0;
 
+    private double kP = 0.2;
+    private double kI = 0;
+    private double kD = 0;
+    private double kF = 0.21;
+
     private Drivetrain(){
         mLeftMaster = TalonSRXFactory.createDefaultTalon(RobotMap.DrivetrainMap.kLeftMaster);
         mLeftSlaveA = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kLeftSlaveA, mLeftMaster);
@@ -55,6 +60,16 @@ public class Drivetrain extends Subsystem implements ILoggable{
 
         mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx, kCTRETimeout);
         mRightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx,kCTRETimeout);
+
+        mLeftMaster.config_kP(0, kP, kCTRETimeout);
+        mLeftMaster.config_kI(0, kI, kCTRETimeout);
+        mLeftMaster.config_kD(0, kD, kCTRETimeout);
+        mLeftMaster.config_kF(0, kF, kCTRETimeout);
+
+        mRightMaster.config_kP(0, kP, kCTRETimeout);
+        mRightMaster.config_kI(0, kI, kCTRETimeout);
+        mRightMaster.config_kD(0, kP, kCTRETimeout);
+        mRightMaster.config_kF(0, kF, kCTRETimeout);
 
         mLeftMaster.setSensorPhase(true);
         mRightMaster.setSensorPhase(true);
@@ -79,10 +94,13 @@ public class Drivetrain extends Subsystem implements ILoggable{
     }
 
     public void setVelocity(double left, double right){
-        setRawSpeed(
-            left  / 12.2 * (10.0 / 12),
-            right / 12.2 * (10.0 / 12)
-        );
+        // setRawSpeed(
+        //     left/12, right/12
+        // );
+
+        System.out.println(mLeftMaster.getClosedLoopError(0) * Constants.kNativeU2FPS);
+        mLeftMaster.set(ControlMode.Velocity, left * Constants.kFPS2NativeU);
+        mRightMaster.set(ControlMode.Velocity, right * Constants.kFPS2NativeU);
     }
 
     public void zeroSensor(){

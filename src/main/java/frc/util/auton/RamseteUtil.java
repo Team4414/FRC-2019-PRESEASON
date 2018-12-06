@@ -17,20 +17,19 @@ import jaci.pathfinder.Trajectory;
  * The functionality of this Controller is based on this paper:
  * https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
  *
- * @author Avidh Bavkar [avidh@team4414.com]
- * @author JJ Sessa [jonathan@team4414.com]
+ * @author Avidh Bavkar [avidh@team4414.com
+ * @author JJ Sessa [jonathan@team4414.co
  */
 public abstract class RamseteUtil {
 
     private final double kTimestep;
-    private static final double kZeta = 0.01;
-    private static final double kB = 0.7;
+    private static final double kZeta = 0.9; //damp (0.7)
+    private static final double kB = 0.1; //aggresive (1.5)
 
     public enum Status{
         STANDBY,    //Robot is finished following a path and waiting for a new one.
         TRACKING    //Robot is currently busy tracking a path.
     }
-
     /**
      * Differentiable Robot Position Inner Class.
      *
@@ -153,17 +152,17 @@ public abstract class RamseteUtil {
         //otherwise you are tracking so update your values.
         status = Status.TRACKING;
         mGoal.update(new Pose2d(
-                path.get(mSegCount).x,
-                path.get(mSegCount).y,
+                path.get(mSegCount).x * Constants.kFeet2Meters,
+                path.get(mSegCount).y * Constants.kFeet2Meters,
                 Rotation2d.fromRadians(path.get(mSegCount).heading)
         ));
         mPos = getPose2d();
         mPos = new Pose2d(
-            mPos.getTranslation().x(),
-            mPos.getTranslation().y(),
+            mPos.getTranslation().x()  * Constants.kFeet2Meters,
+            mPos.getTranslation().y()  * Constants.kFeet2Meters,
             mPos.getRotation()
         );
-
+ 
 
         mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(Pathfinder.r2d(mGoal.getPos().getRotation().getRadians() - 
                       mPos.getRotation().getRadians())));
@@ -171,18 +170,22 @@ public abstract class RamseteUtil {
         //Constant Equation from the paper.
         mConstant = 2.0 * kZeta *
                 Math.sqrt(Math.pow(mGoal.getDeriv().getRotation().getRadians(), 2.0) +
-                kB * Math.pow(path.get(mSegCount).velocity, 2.0));
+                kB * Math.pow((path.get(mSegCount).velocity * Constants.kFeet2Meters), 2.0));
 
         //Eq. 5.12!
-        ramv =  path.get(mSegCount).velocity * Math.cos(mAngleError) +
-                mConstant * (Math.cos(mPos.getRotation().getRadians())) * 
-                (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x() +
+        ramv =  path.get(mSegCount).velocity * Constants.kFeet2Meters * Math.cos(mAngleError) +
+                mConstant * (Math.cos(mPos.getRotation().getRadians()) * 
+                (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x()) +
                 Math.sin(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y()));
 
-        ramw =  mGoal.getDeriv().getRotation().getRadians() + kB * path.get(mSegCount).velocity *
+        //ramv = vd * Math.cos(eAngle) + k1 * (Math.cos(angle) * (gx - rx) + Math.sin(angle) * (gy - ry));
+
+        ramw =  mGoal.getDeriv().getRotation().getRadians() + kB * path.get(mSegCount).velocity * Constants.kFeet2Meters *
                 (Math.sin(mAngleError) / (mAngleError)) * (Math.cos(mPos.getRotation().getRadians()) *
                 (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y()) - Math.sin(mPos.getRotation().getRadians()) *
                 (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x())) + mConstant * (mAngleError);
+
+        //ramw = wd + kb * vd * (Math.sin(eAngle) / (eAngle)) * (Math.cos(angle) * (gy - ry) - Math.sin(angle) * (gx - rx)) + k1 * (eAngle);
 
 
         mSegCount ++;
@@ -214,8 +217,8 @@ public abstract class RamseteUtil {
      */
     public DriveSignal getVels(){
         return new DriveSignal(
-                (ramv - (ramw * (kWheelBase / 2))),
-                (ramv + (ramw * (kWheelBase / 2)))
+                Constants.kMeters2Feet* (ramv - ramw * (kWheelBase * Constants.kFeet2Meters) / 2),
+                Constants.kMeters2Feet *(ramv + ramw * (kWheelBase * Constants.kFeet2Meters) / 2)
         );
     }
 

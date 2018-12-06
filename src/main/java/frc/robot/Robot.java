@@ -19,7 +19,7 @@ public class Robot extends IterativeRobot{;
 
     public static final double kLocalizerTimestep = 0.01;
     public static final double kLoggingTimestep = 0.1;
-    public static final double kRamseteTimestep = 0.05;
+    public static final double kRamseteTimestep = 0.01;
 
     private Trajectory autonTraj;
 
@@ -46,6 +46,7 @@ public class Robot extends IterativeRobot{;
     @Override
     public void autonomousInit() {
         intoEnabled();
+        Drivetrain.getInstance().zeroSensor();
 
         Drivetrain.masterPos = new Pose2d();
 
@@ -63,14 +64,18 @@ public class Robot extends IterativeRobot{;
 
     @Override
     public void teleopPeriodic() {
-        Drivetrain.getInstance().setRawSpeed(
-            mCheesyDriveHelper.cheesyDrive(
-            OI.getInstance().getForward(),
-            OI.getInstance().getLeft(),
-            OI.getInstance().getQuickTurn()
-            , true)
-        );
-        System.out.println(OI.getInstance().getForward() + "\t|\t" + OI.getInstance().getLeft());
+        // Drivetrain.getInstance().setRawSpeed(
+        //     mCheesyDriveHelper.cheesyDrive(
+        //     OI.getInstance().getForward(),
+        //     OI.getInstance().getLeft(),
+        //     OI.getInstance().getQuickTurn()
+        //     , true)
+        // );
+        Drivetrain.getInstance().setVelocity(6, 6);
+
+        
+        // Drivetrain.getInstance().setRawSpeed(1, 1);
+        // System.out.println(OI.getInstance().getForward() + "\t|\t" + OI.getInstance().getLeft());
     }
 
     @Override
