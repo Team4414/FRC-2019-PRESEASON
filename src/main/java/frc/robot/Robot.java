@@ -2,6 +2,7 @@ package frc.robot;
 
 import java.io.File;
 
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import frc.robot.auton.Odometery;
@@ -17,14 +18,21 @@ public class Robot extends IterativeRobot{;
 
     CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
 
-    public static final double kLocalizerTimestep = 0.01;
+    public static final double kLocalizerTimestep = 0.005;
     public static final double kLoggingTimestep = 0.1;
     public static final double kRamseteTimestep = 0.01;
 
     private Trajectory autonTraj;
 
+    private UsbCamera driveCam;
+
     @Override
     public void robotInit(){
+
+        driveCam = CameraServer.getInstance().startAutomaticCapture();
+		driveCam.setResolution(320, 240);
+        driveCam.setFPS(12);
+
         Drivetrain.getInstance().zeroSensor();
 
         //verify both Odometery and Ramsete are constructed
@@ -55,6 +63,12 @@ public class Robot extends IterativeRobot{;
 
         Ramsete.getInstance().trackPath(autonTraj);
     }
+
+    @Override
+    public void autonomousPeriodic() {
+        System.out.println(Drivetrain.masterPos.getTranslation().x() + "\t|\t" + Drivetrain.masterPos.getTranslation().y());
+        // System.out.println(Drivetrain.getInstance().getLeftSensorPosition() + "\t|\t" + Drivetrain.getInstance().getRightSensorPosition());
+    }
     
     @Override
     public void teleopInit(){
@@ -64,15 +78,14 @@ public class Robot extends IterativeRobot{;
 
     @Override
     public void teleopPeriodic() {
-        // Drivetrain.getInstance().setRawSpeed(
-        //     mCheesyDriveHelper.cheesyDrive(
-        //     OI.getInstance().getForward(),
-        //     OI.getInstance().getLeft(),
-        //     OI.getInstance().getQuickTurn()
-        //     , true)
-        // );
-        Drivetrain.getInstance().setVelocity(6, 6);
-
+        Drivetrain.getInstance().setRawSpeed(
+            mCheesyDriveHelper.cheesyDrive(
+            OI.getInstance().getForward(),
+            OI.getInstance().getLeft(),
+            OI.getInstance().getQuickTurn()
+            , true)
+        );
+        // Drivetrain.getInstance().setVelocity(6,6);
         
         // Drivetrain.getInstance().setRawSpeed(1, 1);
         // System.out.println(OI.getInstance().getForward() + "\t|\t" + OI.getInstance().getLeft());

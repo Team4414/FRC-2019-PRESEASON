@@ -58,8 +58,8 @@ public class Ramsete extends RamseteUtil implements Runnable, ILoggable{
                 return new LogObject[]{
                     new LogObject("Time", Timer.getFPGATimestamp()),
                     new LogObject("Type", "P"),
-                    new LogObject("XPos", mGoal.getPos().getTranslation().x() * Constants.kMeters2Feet),
-                    new LogObject("YPos", mGoal.getPos().getTranslation().y() * Constants.kMeters2Feet),
+                    new LogObject("XPos", mGoal.getPos().getTranslation().x()),
+                    new LogObject("YPos", mGoal.getPos().getTranslation().y()),
                     new LogObject("Heading", mGoal.getPos().getRotation().getRadians()),
                 };
             }

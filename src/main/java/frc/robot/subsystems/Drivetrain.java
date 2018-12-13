@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
@@ -39,10 +41,12 @@ public class Drivetrain extends Subsystem implements ILoggable{
     private int mRightZeroOffset = 0;
     private double mGyroOffset = 0;
 
-    private double kP = 0.2;
+    private double kP = 0.4;
     private double kI = 0;
     private double kD = 0;
-    private double kF = 0.21;
+    private double kF = 0.17;
+
+    private double kFriction = 0.1;
 
     private Drivetrain(){
         mLeftMaster = TalonSRXFactory.createDefaultTalon(RobotMap.DrivetrainMap.kLeftMaster);
@@ -99,8 +103,9 @@ public class Drivetrain extends Subsystem implements ILoggable{
         // );
 
         System.out.println(mLeftMaster.getClosedLoopError(0) * Constants.kNativeU2FPS);
-        mLeftMaster.set(ControlMode.Velocity, left * Constants.kFPS2NativeU);
-        mRightMaster.set(ControlMode.Velocity, right * Constants.kFPS2NativeU);
+
+        mLeftMaster.set(ControlMode.Velocity, left * Constants.kFPS2NativeU, DemandType.ArbitraryFeedForward , kFriction);
+        mRightMaster.set(ControlMode.Velocity, right * Constants.kFPS2NativeU, DemandType.ArbitraryFeedForward, kFriction);
     }
 
     public void zeroSensor(){

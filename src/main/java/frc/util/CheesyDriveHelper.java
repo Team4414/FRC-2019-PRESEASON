@@ -8,8 +8,8 @@ package frc.util;
  */
 public class CheesyDriveHelper {
 
-    private static final double kThrottleDeadband = 0.200;
-    private static final double kWheelDeadband = 0.200;
+    private static final double kThrottleDeadband = 0.01;
+    private static final double kWheelDeadband = 0.01;
 
     // These factor determine how fast the wheel traverses the "non linear" sine curve.
     private static final double kHighWheelNonLinearity = 0.65;

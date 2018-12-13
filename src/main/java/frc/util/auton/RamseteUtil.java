@@ -23,8 +23,8 @@ import jaci.pathfinder.Trajectory;
 public abstract class RamseteUtil {
 
     private final double kTimestep;
-    private static final double kZeta = 0.9; //damp (0.7)
-    private static final double kB = 0.1; //aggresive (1.5)
+    private static final double kZeta = 0.7; //Damper (0.9)
+    private static final double kB = 5;    //Agressiveness (0.1)
 
     public enum Status{
         STANDBY,    //Robot is finished following a path and waiting for a new one.
@@ -152,14 +152,14 @@ public abstract class RamseteUtil {
         //otherwise you are tracking so update your values.
         status = Status.TRACKING;
         mGoal.update(new Pose2d(
-                path.get(mSegCount).x * Constants.kFeet2Meters,
-                path.get(mSegCount).y * Constants.kFeet2Meters,
+                path.get(mSegCount).x,
+                path.get(mSegCount).y,
                 Rotation2d.fromRadians(path.get(mSegCount).heading)
         ));
         mPos = getPose2d();
         mPos = new Pose2d(
-            mPos.getTranslation().x()  * Constants.kFeet2Meters,
-            mPos.getTranslation().y()  * Constants.kFeet2Meters,
+            mPos.getTranslation().x(),
+            mPos.getTranslation().y(),
             mPos.getRotation()
         );
  
@@ -175,18 +175,13 @@ public abstract class RamseteUtil {
         //Eq. 5.12!
         ramv =  path.get(mSegCount).velocity * Constants.kFeet2Meters * Math.cos(mAngleError) +
                 mConstant * (Math.cos(mPos.getRotation().getRadians()) * 
-                (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x()) +
-                Math.sin(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y()));
-
-        //ramv = vd * Math.cos(eAngle) + k1 * (Math.cos(angle) * (gx - rx) + Math.sin(angle) * (gy - ry));
+                (mGoal.mCurrentPos.getTranslation().x() * Constants.kFeet2Meters - mPos.getTranslation().x()  * Constants.kFeet2Meters) +
+                Math.sin(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().y()  * Constants.kFeet2Meters - mPos.getTranslation().y()  * Constants.kFeet2Meters));
 
         ramw =  mGoal.getDeriv().getRotation().getRadians() + kB * path.get(mSegCount).velocity * Constants.kFeet2Meters *
                 (Math.sin(mAngleError) / (mAngleError)) * (Math.cos(mPos.getRotation().getRadians()) *
-                (mGoal.mCurrentPos.getTranslation().y() - mPos.getTranslation().y()) - Math.sin(mPos.getRotation().getRadians()) *
-                (mGoal.mCurrentPos.getTranslation().x() - mPos.getTranslation().x())) + mConstant * (mAngleError);
-
-        //ramw = wd + kb * vd * (Math.sin(eAngle) / (eAngle)) * (Math.cos(angle) * (gy - ry) - Math.sin(angle) * (gx - rx)) + k1 * (eAngle);
-
+                (mGoal.mCurrentPos.getTranslation().y()  * Constants.kFeet2Meters - mPos.getTranslation().y()  * Constants.kFeet2Meters) - Math.sin(mPos.getRotation().getRadians()) *
+                (mGoal.mCurrentPos.getTranslation().x()  * Constants.kFeet2Meters - mPos.getTranslation().x()  * Constants.kFeet2Meters)) + mConstant * (mAngleError);
 
         mSegCount ++;
     }
@@ -217,8 +212,8 @@ public abstract class RamseteUtil {
      */
     public DriveSignal getVels(){
         return new DriveSignal(
-                Constants.kMeters2Feet* (ramv - ramw * (kWheelBase * Constants.kFeet2Meters) / 2),
-                Constants.kMeters2Feet *(ramv + ramw * (kWheelBase * Constants.kFeet2Meters) / 2)
+                Constants.kMeters2Feet * (ramv - ramw * (kWheelBase * Constants.kFeet2Meters) / 2),
+                Constants.kMeters2Feet * (ramv + ramw * (kWheelBase * Constants.kFeet2Meters) / 2)
         );
     }
 

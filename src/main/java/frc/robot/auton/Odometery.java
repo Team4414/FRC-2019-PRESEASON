@@ -12,6 +12,9 @@ public class Odometery implements Runnable{
     private final double kTimestep;
 
     private static Odometery instance;
+
+    private double lastLeftPos  = 0;
+    private double lastRightPos = 0;
     public static Odometery getInstance(){
         if (instance == null)
             instance = new Odometery(Robot.kLocalizerTimestep);
@@ -35,17 +38,23 @@ public class Odometery implements Runnable{
     public void run() {
         Drivetrain.getInstance();
         Drivetrain.masterPos = Drivetrain.masterPos.transformBy(Twist2d.fromWheels(
-            getLeftWheelVelocity() * kTimestep,
-            getRightWheelVelocity() *kTimestep, 
+            getLeftWheelVelocity(),
+            getRightWheelVelocity(), 
             getHeading().getRadians()));
     }
 
     protected double getLeftWheelVelocity() {
-        return Drivetrain.getInstance().getLeftSensorVelocity();
+        // return Drivetrain.getInstance().getLeftSensorVelocity();
+        double returnMe = (Drivetrain.getInstance().getLeftSensorPosition() - lastLeftPos);
+        lastLeftPos = Drivetrain.getInstance().getLeftSensorPosition();
+        return returnMe;
     }
 
     protected double getRightWheelVelocity() {
-        return Drivetrain.getInstance().getRightSensorVelocity();
+        // return Drivetrain.getInstance().getRightSensorVelocity();
+        double returnMe = (Drivetrain.getInstance().getRightSensorPosition() - lastRightPos);
+        lastRightPos = Drivetrain.getInstance().getRightSensorPosition();
+        return returnMe;
     }
 
     protected Rotation2d getHeading(){
