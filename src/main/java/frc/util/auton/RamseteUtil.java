@@ -27,17 +27,18 @@ public abstract class RamseteUtil {
     private static final double kBeta = 5.65;    //Agressiveness (0.1)
 
     public enum Status{
+        STOPPED,    //Controller is halted and must be started before attempting to follow a path.
         STANDBY,    //Robot is finished following a path and waiting for a new one.
         TRACKING    //Robot is currently busy tracking a path.
     }
 
     public Trajectory path;
     public int mSegCount;
-    public static Status status = Status.STANDBY;
+    public static Status status = Status.STOPPED;
 
     private double mConstant, mAngleError, ramv, ramw, lastTheta;
 
-    protected double gX, gY, gTheta, gTheta_Last,
+    private double gX, gY, gTheta, gTheta_Last,
                    rX, rY, rTheta,
                    gW, gV;
 
@@ -59,16 +60,15 @@ public abstract class RamseteUtil {
 
         if (path == null || mSegCount >= path.length()){
             //if the path is null or you are done tracking one, reset the controller and do not continue.
-            path = null;
-            mConstant = 0;
-            mAngleError = 0;
-            ramv = 0;
-            ramw = 0;
+            prepareForStandby();
             status = Status.STANDBY;
-            mSegCount = -1;
             return;
         }
 
+        //otherwise you are tracking so update your values.
+        status = Status.TRACKING;
+
+        //Ramsete Math:
         gX = path.get(mSegCount).x * Constants.kFeet2Meters;
         gY = path.get(mSegCount).y * Constants.kFeet2Meters;
         gTheta = path.get(mSegCount).heading;
@@ -79,9 +79,6 @@ public abstract class RamseteUtil {
 
         gW = (gTheta - gTheta_Last) / kTimestep;
         gV = path.get(mSegCount).velocity * Constants.kFeet2Meters;
-
-        //otherwise you are tracking so update your values.
-        status = Status.TRACKING;
 
         mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(Pathfinder.r2d(gTheta - rTheta)));
 
@@ -117,11 +114,11 @@ public abstract class RamseteUtil {
     }
 
     /**
-     * Update State Method.
+     * Force Update State Method.
      *
      * <p>Forces an update of state</p>
      */
-    public void updateState(){
+    public void forceStateUpdate(){
         status = (path == null || mSegCount >= path.length()) ? Status.STANDBY : Status.TRACKING;
     }
 
@@ -138,6 +135,51 @@ public abstract class RamseteUtil {
     }
 
     /**
+     * Set Status Method.
+     * 
+     * <p> 
+     * Attempts to switch the controller into a provided state. If the controller is tracking and the user wants
+     * to switch it to standby mode, they must force it as this will cause the robot to stop tracking.
+     * </p>
+     * 
+     * @param desiredState The state to attempt to change to.
+     * @param force Caution! Robot will stop tracking!
+     */
+    public boolean setStatus(Status destiredState, boolean force){
+        forceStateUpdate(); //force an update in state.
+        if (destiredState == status || destiredState == Status.STOPPED){
+            //If the state (between Standby and Tracking) is not what you want, you can't switch to it so skip this.
+            //Unless you want to set to stopped, which doesn't affect the function of this controller.
+
+            status = destiredState;
+            return true;
+        }
+
+        if (force && destiredState != Status.TRACKING){
+            //You can only force the controller into standby
+            prepareForStandby();
+            status = Status.STANDBY;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Prepare For Standby Method
+     * 
+     * <p> Handles zeroing values when transitioning into {@Link Status.STANDBY} </p>
+     */
+    private void prepareForStandby(){
+        path = null;
+        mConstant = 0;
+        mAngleError = 0;
+        ramv = 0;
+        ramw = 0;
+        mSegCount = -1;
+    }
+
+    /**
      * Get Status Method.
      *
      * @return The {@link Status} of the controller.
@@ -145,6 +187,12 @@ public abstract class RamseteUtil {
     public Status getStatus(){
         return status;
     }
+
+    public double getGoalX(){ return gX; }
+
+    public double getGoalY(){ return gY; }
+
+    public double getGoalTheta(){ return gTheta; }
 
     /**
      * Get Robot Position Method.
