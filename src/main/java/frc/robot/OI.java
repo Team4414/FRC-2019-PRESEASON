@@ -37,6 +37,9 @@ public class OI{
         turnNub = new Joystick(kTurnNubID);
         xbox = new Joystick(kXbox);
 
+        kThrottleStickOffset = 0;
+        kTurnStickOffset = 0;
+
         kThrottleStickOffset = getForward();
         kTurnStickOffset = getLeft();
     }

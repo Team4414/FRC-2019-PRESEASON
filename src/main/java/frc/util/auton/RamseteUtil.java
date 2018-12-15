@@ -1,9 +1,9 @@
 package frc.util.auton;
 
 import frc.robot.Constants;
+import frc.robot.subsystems.Drivetrain;
 import frc.util.DriveSignal;
-import frc.util.kinematics.pos.Pose2d;
-import frc.util.kinematics.pos.Rotation2d;
+import frc.util.kinematics.pos.RobotPos;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 
@@ -23,111 +23,31 @@ import jaci.pathfinder.Trajectory;
 public abstract class RamseteUtil {
 
     private final double kTimestep;
-    private static final double kZeta = 0.7; //Damper (0.9)
-    private static final double kB = 5;    //Agressiveness (0.1)
+    private static final double kZeta = 0.96; //Damper (0.9)
+    private static final double kBeta = 5.65;    //Agressiveness (0.1)
 
     public enum Status{
         STANDBY,    //Robot is finished following a path and waiting for a new one.
         TRACKING    //Robot is currently busy tracking a path.
-    }
-    /**
-     * Differentiable Robot Position Inner Class.
-     *
-     * <p>
-     * Automatically stores three sequential {@link Pose2d} Objects and uses these to calculate the first
-     * and second derivatives of the position
-     * </p>
-     */
-    protected class DifferentiablePose2d {
-
-        private Pose2d mCurrentPos;
-        private Pose2d mPrevPos;
-        private Pose2d mPrevPrevPos;
-
-        public DifferentiablePose2d(Pose2d initPos){
-            mPrevPos = new Pose2d();
-            mPrevPrevPos = new Pose2d();
-            update(initPos);
-        }
-
-        /**
-         * Update Method.
-         *
-         * <p> Pass in the current position </p>
-         */
-        public void update(Pose2d currentPos){
-            mPrevPrevPos = mPrevPos;
-            mPrevPos = mCurrentPos;
-            mCurrentPos = currentPos;
-        }
-
-        /**
-         * Get Position Method.
-         *
-         * @return The current position.
-         */
-        public Pose2d getPos(){
-            return mCurrentPos;
-        }
-
-        /**
-         * Get Derivative Method.
-         *
-         * @return The first derivative of position.
-         */
-        public Pose2d getDeriv(){
-            //slope of current and previous is approx. derivative.
-            return new Pose2d(
-                    getSlope(mCurrentPos.getTranslation().x(), mPrevPos.getTranslation().x()),
-                    getSlope(mCurrentPos.getTranslation().y(), mPrevPos.getTranslation().y()),
-                    Rotation2d.fromRadians(getSlope(mCurrentPos.getRotation().getRadians(), mPrevPos.getRotation().getRadians()))
-            );
-        }
-
-        /**
-         * Get Second Derivative Method.
-         *
-         * @return The second derivative of position.
-         */
-        public Pose2d getSecondDeriv(){
-            //slope of the slope between three points is approx. second derivative.
-            return new Pose2d(
-                    getSlope(getSlope(mCurrentPos.getTranslation().x(), mPrevPos.getTranslation().x()),
-                            getSlope(mPrevPos.getTranslation().x(), mPrevPrevPos.getTranslation().x())),
-                    getSlope(getSlope(mCurrentPos.getTranslation().y(), mPrevPos.getTranslation().y()),
-                            getSlope(mPrevPos.getTranslation().y(), mPrevPrevPos.getTranslation().y())),
-                    
-                    Rotation2d.fromRadians(
-                        getSlope(getSlope(mCurrentPos.getRotation().getRadians(), mPrevPos.getRotation().getRadians()),
-                                getSlope(mPrevPos.getRotation().getRadians(), mPrevPrevPos.getRotation().getRadians()))
-                    )
-            );
-        }
-
-        private double getSlope(double curr, double prev){
-            return (curr - prev) / kTimestep;
-        }
-
-
     }
 
     public Trajectory path;
     public int mSegCount;
     public static Status status = Status.STANDBY;
 
-    protected DifferentiablePose2d mGoal;
-    private Pose2d mPos;
+    private double mConstant, mAngleError, ramv, ramw, lastTheta;
 
-    private double mConstant, mAngleError, ramv, ramw;
+    protected double gX, gY, gTheta, gTheta_Last,
+                   rX, rY, rTheta,
+                   gW, gV;
 
     private final double kWheelBase;
 
     public RamseteUtil(double wheelBase, double timeStep){
         mSegCount = -1; //-1 used as an invalid number
-        mPos = getPose2d();
         kWheelBase = wheelBase;
         kTimestep = timeStep;
-        mGoal = new DifferentiablePose2d(new Pose2d());
+        lastTheta = 0;
     }
 
     /**
@@ -149,39 +69,39 @@ public abstract class RamseteUtil {
             return;
         }
 
+        gX = path.get(mSegCount).x * Constants.kFeet2Meters;
+        gY = path.get(mSegCount).y * Constants.kFeet2Meters;
+        gTheta = path.get(mSegCount).heading;
+
+        rX = getPose2d().getX() * Constants.kFeet2Meters;
+        rY = getPose2d().getY() * Constants.kFeet2Meters;
+        rTheta = Pathfinder.d2r(getPose2d().getHeading());
+
+        gW = (gTheta - gTheta_Last) / kTimestep;
+        gV = path.get(mSegCount).velocity * Constants.kFeet2Meters;
+
         //otherwise you are tracking so update your values.
         status = Status.TRACKING;
-        mGoal.update(new Pose2d(
-                path.get(mSegCount).x,
-                path.get(mSegCount).y,
-                Rotation2d.fromRadians(path.get(mSegCount).heading)
-        ));
-        mPos = getPose2d();
-        mPos = new Pose2d(
-            mPos.getTranslation().x(),
-            mPos.getTranslation().y(),
-            mPos.getRotation()
-        );
- 
 
-        mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(Pathfinder.r2d(mGoal.getPos().getRotation().getRadians() - 
-                      mPos.getRotation().getRadians())));
+        mAngleError = Pathfinder.d2r(Pathfinder.boundHalfDegrees(Pathfinder.r2d(gTheta - rTheta)));
 
         //Constant Equation from the paper.
         mConstant = 2.0 * kZeta *
-                Math.sqrt(Math.pow(mGoal.getDeriv().getRotation().getRadians(), 2.0) +
-                kB * Math.pow((path.get(mSegCount).velocity * Constants.kFeet2Meters), 2.0));
+                Math.sqrt(Math.pow(gW, 2.0) +
+                kBeta * Math.pow(gV, 2.0));
+
+        gTheta_Last = gTheta;
 
         //Eq. 5.12!
-        ramv =  path.get(mSegCount).velocity * Constants.kFeet2Meters * Math.cos(mAngleError) +
-                mConstant * (Math.cos(mPos.getRotation().getRadians()) * 
-                (mGoal.mCurrentPos.getTranslation().x() * Constants.kFeet2Meters - mPos.getTranslation().x()  * Constants.kFeet2Meters) +
-                Math.sin(mPos.getRotation().getRadians()) * (mGoal.mCurrentPos.getTranslation().y()  * Constants.kFeet2Meters - mPos.getTranslation().y()  * Constants.kFeet2Meters));
+        ramv =  gV * Math.cos(mAngleError) +
+                mConstant * (Math.cos(rTheta) * 
+                (gX - rX)) +
+                Math.sin(rTheta) * (gY - rY);
 
-        ramw =  mGoal.getDeriv().getRotation().getRadians() + kB * path.get(mSegCount).velocity * Constants.kFeet2Meters *
-                (Math.sin(mAngleError) / (mAngleError)) * (Math.cos(mPos.getRotation().getRadians()) *
-                (mGoal.mCurrentPos.getTranslation().y()  * Constants.kFeet2Meters - mPos.getTranslation().y()  * Constants.kFeet2Meters) - Math.sin(mPos.getRotation().getRadians()) *
-                (mGoal.mCurrentPos.getTranslation().x()  * Constants.kFeet2Meters - mPos.getTranslation().x()  * Constants.kFeet2Meters)) + mConstant * (mAngleError);
+        ramw =  gW + kBeta * gV *
+                (Math.sin(mAngleError) / (mAngleError)) * (Math.cos(rTheta) *
+                (gY - rY) - Math.sin(rTheta) *
+                (gX - rX)) + mConstant * (mAngleError);
 
         mSegCount ++;
     }
@@ -231,5 +151,5 @@ public abstract class RamseteUtil {
      *
      * @return The current position of the robot.
      */
-    public abstract Pose2d getPose2d();
+    public abstract RobotPos getPose2d();
 }

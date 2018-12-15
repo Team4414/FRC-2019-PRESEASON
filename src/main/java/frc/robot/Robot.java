@@ -1,18 +1,18 @@
 package frc.robot;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import frc.robot.auton.Odometery;
+import frc.robot.auton.PathLoader;
 import frc.robot.auton.Ramsete;
 import frc.robot.subsystems.Drivetrain;
 import frc.util.CheesyDriveHelper;
-import frc.util.kinematics.pos.Pose2d;
+import frc.util.kinematics.pos.RobotPos;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
-import jaci.pathfinder.Waypoint;
 
 public class Robot extends IterativeRobot{;
 
@@ -22,21 +22,21 @@ public class Robot extends IterativeRobot{;
     public static final double kLoggingTimestep = 0.1;
     public static final double kRamseteTimestep = 0.01;
 
-    private Trajectory autonTraj;
+    public static LinkedHashMap autonPaths;
 
-    private UsbCamera driveCam;
+    // private UsbCamera driveCam;
 
     @Override
     public void robotInit(){
 
-        driveCam = CameraServer.getInstance().startAutomaticCapture();
-		driveCam.setResolution(320, 240);
-        driveCam.setFPS(12);
+        // driveCam = CameraServer.getInstance().startAutomaticCapture();
+		// driveCam.setResolution(320, 240);
+        // driveCam.setFPS(12);
 
         Drivetrain.getInstance().zeroSensor();
 
         //verify both Odometery and Ramsete are constructed
-        Odometery.getInstance();
+        // Odometery.getInstance();
         Ramsete.getInstance();
         PeriodicLogger.getInstance();
 
@@ -46,7 +46,7 @@ public class Robot extends IterativeRobot{;
 
         CameraServer.getInstance().startAutomaticCapture();
 
-        autonTraj = getTrajFromFile("/home/lvuser/autoPaths/TestPath_left_detailed.csv");
+        autonPaths = PathLoader.loadPaths();
 
         PeriodicLogger.getInstance().start();
     }
@@ -56,24 +56,19 @@ public class Robot extends IterativeRobot{;
         intoEnabled();
         Drivetrain.getInstance().zeroSensor();
 
-        Drivetrain.masterPos = new Pose2d();
-
-        Odometery.getInstance().start();
+        Drivetrain.getInstance().startOdometery(kLocalizerTimestep);
         Ramsete.getInstance().start();
 
-        Ramsete.getInstance().trackPath(autonTraj);
     }
 
     @Override
     public void autonomousPeriodic() {
-        System.out.println(Drivetrain.masterPos.getTranslation().x() + "\t|\t" + Drivetrain.masterPos.getTranslation().y());
-        // System.out.println(Drivetrain.getInstance().getLeftSensorPosition() + "\t|\t" + Drivetrain.getInstance().getRightSensorPosition());
+        //no-op
     }
     
     @Override
     public void teleopInit(){
         intoEnabled();
-        Odometery.getInstance().start();
     }
 
     @Override
@@ -85,10 +80,6 @@ public class Robot extends IterativeRobot{;
             OI.getInstance().getQuickTurn()
             , true)
         );
-        // Drivetrain.getInstance().setVelocity(6,6);
-        
-        // Drivetrain.getInstance().setRawSpeed(1, 1);
-        // System.out.println(OI.getInstance().getForward() + "\t|\t" + OI.getInstance().getLeft());
     }
 
     @Override
@@ -101,30 +92,9 @@ public class Robot extends IterativeRobot{;
         PeriodicLogger.allToCSV();
         PeriodicLogger.clearAll();
 
-        Odometery.getInstance().stop();
+        Drivetrain.getInstance().stopOdometery();
         Ramsete.getInstance().stop();
-    }
-
-
-    private Trajectory getTrajFromFile(String file){
-        return Pathfinder.readFromCSV(new File(file));
-    //     Waypoint[] points = new Waypoint[] {
-
-    //         new Waypoint(0, 0, Pathfinder.d2r(0)), // Waypoint @ x=0, y=0, exit angle=0 radians						// angle=-45 degrees
-    //         new Waypoint(4, 4, Pathfinder.d2r(0)), // Waypoint @ x=-2, y=-2, exit angle=0 radians				// angle=-45 degrees
-            
-    //     };
-
-    //     Trajectory.Config config;
-    //     Trajectory trajectory;
-
-        
-    //     config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH,
-    //             kRamseteTimestep, 4, 4, 10000);
-    //     trajectory = Pathfinder.generate(points, config);
-
-    //     System.out.println(trajectory.length());
-    //     return trajectory;
+        System.out.println(Drivetrain.getInstance().getRobotX() + "\t\t\t" + Drivetrain.getInstance().getRobotY());
     }
 
     public void intoEnabled(){

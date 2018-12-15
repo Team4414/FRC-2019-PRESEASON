@@ -1,7 +1,7 @@
 package frc.robot;
 
 public class Constants{
-    public static final double kFeet2Ticks= 3854.9;
+    public static final double kFeet2Ticks= 3833;
     public static final double kTicks2Feet= 1/kFeet2Ticks;
     
     public static final double kWheelBase = 2.325;
