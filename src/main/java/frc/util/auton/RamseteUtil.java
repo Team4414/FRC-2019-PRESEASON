@@ -1,7 +1,6 @@
 package frc.util.auton;
 
 import frc.robot.Constants;
-import frc.robot.subsystems.Drivetrain;
 import frc.util.DriveSignal;
 import frc.util.kinematics.pos.RobotPos;
 import jaci.pathfinder.Pathfinder;
@@ -17,13 +16,13 @@ import jaci.pathfinder.Trajectory;
  * The functionality of this Controller is based on this paper:
  * https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
  *
- * @author Avidh Bavkar [avidh@team4414.com
- * @author JJ Sessa [jonathan@team4414.co
+ * @author Avidh Bavkar [avidh@team4414.com]
+ * @author JJ Sessa [jonathan@team4414.com]
  */
 public abstract class RamseteUtil {
 
     private final double kTimestep;
-    private static final double kZeta = 0.96; //Damper (0.9)
+    private static final double kZeta = 0.96;    //Damper (0.9)
     private static final double kBeta = 5.65;    //Agressiveness (0.1)
 
     public enum Status{
@@ -34,9 +33,9 @@ public abstract class RamseteUtil {
 
     public Trajectory path;
     public int mSegCount;
-    public static Status status = Status.STOPPED;
+    private static Status status = Status.STOPPED;
 
-    private double mConstant, mAngleError, ramv, ramw, lastTheta;
+    private double mConstant, mAngleError, ramv, ramw;
 
     private double gX, gY, gTheta, gTheta_Last,
                    rX, rY, rTheta,
@@ -48,7 +47,6 @@ public abstract class RamseteUtil {
         mSegCount = -1; //-1 used as an invalid number
         kWheelBase = wheelBase;
         kTimestep = timeStep;
-        lastTheta = 0;
     }
 
     /**
@@ -111,6 +109,7 @@ public abstract class RamseteUtil {
     public void trackPath(Trajectory path){
         this.path = path;
         mSegCount = 0;
+        forceStateUpdate();
     }
 
     /**
@@ -184,7 +183,7 @@ public abstract class RamseteUtil {
      *
      * @return The {@link Status} of the controller.
      */
-    public Status getStatus(){
+    public static Status getStatus(){
         return status;
     }
 

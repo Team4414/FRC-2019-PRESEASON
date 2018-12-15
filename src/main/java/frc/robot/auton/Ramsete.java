@@ -32,10 +32,12 @@ public class Ramsete extends RamseteUtil implements Runnable, ILoggable{
 
     public void start(){
         mNotifier.startPeriodic(kTimestep);
+        forceStateUpdate();
     }
 
     public void stop(){
         mNotifier.stop();
+        setStatus(Status.STOPPED, false);
     }
 
     @Override
@@ -58,9 +60,9 @@ public class Ramsete extends RamseteUtil implements Runnable, ILoggable{
                 return new LogObject[]{
                     new LogObject("Time", Timer.getFPGATimestamp()),
                     new LogObject("Type", "P"),
-                    new LogObject("XPos", gX),
-                    new LogObject("YPos", gY),
-                    new LogObject("Heading", gTheta),
+                    new LogObject("XPos", getGoalX()),
+                    new LogObject("YPos", getGoalY()),
+                    new LogObject("Heading", getGoalTheta()),
                 };
             }
         };

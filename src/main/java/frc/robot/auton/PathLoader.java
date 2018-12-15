@@ -17,6 +17,7 @@ public class PathLoader{
         paths.put("DriveCurveLeft", getTraj("LeftCurve"));
         paths.put("DriveCurveRight", getTraj("RightCurve"));
 
+        return paths;
     }
 
     private static Trajectory getTraj(String name){

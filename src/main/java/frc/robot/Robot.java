@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.command.Command;
+import frc.robot.auton.MoveCommand;
 import frc.robot.auton.PathLoader;
 import frc.robot.auton.Ramsete;
 import frc.robot.subsystems.Drivetrain;
@@ -22,7 +24,9 @@ public class Robot extends IterativeRobot{;
     public static final double kLoggingTimestep = 0.1;
     public static final double kRamseteTimestep = 0.01;
 
-    public static LinkedHashMap autonPaths;
+    public static LinkedHashMap<String, Trajectory> autonPaths;
+
+    Command autonCommand;
 
     // private UsbCamera driveCam;
 
@@ -48,6 +52,8 @@ public class Robot extends IterativeRobot{;
 
         autonPaths = PathLoader.loadPaths();
 
+        autonCommand = new MoveCommand(autonPaths.get("LeftCurve"));
+
         PeriodicLogger.getInstance().start();
     }
 
@@ -59,6 +65,7 @@ public class Robot extends IterativeRobot{;
         Drivetrain.getInstance().startOdometery(kLocalizerTimestep);
         Ramsete.getInstance().start();
 
+        autonCommand.start();
     }
 
     @Override
