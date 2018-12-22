@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
@@ -99,7 +98,6 @@ public class Drivetrain extends Subsystem implements ILoggable{
             x +=  Math.cos(Pathfinder.d2r((theta))) * mDeltaPos;
             y +=  Math.sin(Pathfinder.d2r((theta))) * mDeltaPos;
             mLastPos = mCurrentPos;
-            System.out.println(x + "\t\t" + y);
         });
     }
 
@@ -116,8 +114,6 @@ public class Drivetrain extends Subsystem implements ILoggable{
     }
 
     public void setVelocity(double left, double right){
-        // System.out.println(mLeftMaster.getClosedLoopError(0) * Constants.kNativeU2FPS);
-
         mLeftMaster.set(ControlMode.Velocity, left * Constants.kFPS2NativeU, DemandType.ArbitraryFeedForward , kFriction);
         mRightMaster.set(ControlMode.Velocity, right * Constants.kFPS2NativeU, DemandType.ArbitraryFeedForward, kFriction);
     }
