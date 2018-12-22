@@ -11,8 +11,8 @@ public class OI{
         return instance;
     }
 
-    private static final int kThrottleNubID = 1;
-    private static final int kTurnNubID = 0;
+    private static final int kThrottleNubID = 0;
+    private static final int kTurnNubID = 1;
 
     private double kThrottleStickOffset = 0;
     private double kTurnStickOffset = 0;
