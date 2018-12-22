@@ -26,14 +26,13 @@ public abstract class RamseteUtil {
     private static final double kBeta = 5.65;    //Agressiveness (0.1)
 
     public enum Status{
-        STOPPED,    //Controller is halted and must be started before attempting to follow a path.
         STANDBY,    //Robot is finished following a path and waiting for a new one.
         TRACKING    //Robot is currently busy tracking a path.
     }
 
     public Trajectory path;
     public int mSegCount;
-    private static Status status = Status.STOPPED;
+    private static Status status = Status.STANDBY;
 
     private double mConstant, mAngleError, ramv, ramw;
 
@@ -119,6 +118,12 @@ public abstract class RamseteUtil {
      */
     public void forceStateUpdate(){
         status = (path == null || mSegCount >= path.length()) ? Status.STANDBY : Status.TRACKING;
+        if (path == null || mSegCount >= path.length()){
+            prepareForStandby();    
+            status = Status.STANDBY;
+        }else{
+            status = Status.TRACKING;
+        }
     }
 
     /**
@@ -131,37 +136,6 @@ public abstract class RamseteUtil {
                 Constants.kMeters2Feet * (ramv - ramw * (kWheelBase * Constants.kFeet2Meters) / 2),
                 Constants.kMeters2Feet * (ramv + ramw * (kWheelBase * Constants.kFeet2Meters) / 2)
         );
-    }
-
-    /**
-     * Set Status Method.
-     * 
-     * <p> 
-     * Attempts to switch the controller into a provided state. If the controller is tracking and the user wants
-     * to switch it to standby mode, they must force it as this will cause the robot to stop tracking.
-     * </p>
-     * 
-     * @param desiredState The state to attempt to change to.
-     * @param force Caution! Robot will stop tracking!
-     */
-    public boolean setStatus(Status destiredState, boolean force){
-        forceStateUpdate(); //force an update in state.
-        if (destiredState == status || destiredState == Status.STOPPED){
-            //If the state (between Standby and Tracking) is not what you want, you can't switch to it so skip this.
-            //Unless you want to set to stopped, which doesn't affect the function of this controller.
-
-            status = destiredState;
-            return true;
-        }
-
-        if (force && destiredState != Status.TRACKING){
-            //You can only force the controller into standby
-            prepareForStandby();
-            status = Status.STANDBY;
-            return true;
-        }
-
-        return false;
     }
 
     /**

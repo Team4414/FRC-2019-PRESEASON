@@ -13,6 +13,8 @@ import frc.util.logging.Loggable;
 public class Ramsete extends RamseteUtil implements Runnable, ILoggable{
 
     private static Ramsete instance;
+    private static boolean isRunning;
+
     public static Ramsete getInstance(){
         if (instance == null)
             instance = new Ramsete(Robot.kRamseteTimestep);
@@ -28,16 +30,23 @@ public class Ramsete extends RamseteUtil implements Runnable, ILoggable{
         mNotifier = new Notifier(this);
         setupLogger();
         kTimestep = timestep;
+        isRunning = false;
     }
 
     public void start(){
+        isRunning = true;
         mNotifier.startPeriodic(kTimestep);
         forceStateUpdate();
     }
 
     public void stop(){
+        isRunning = false;
         mNotifier.stop();
-        setStatus(Status.STOPPED, false);
+        Drivetrain.getInstance().setRawSpeed(0, 0); //stop the robot.
+    }
+
+    public static boolean isRunning(){
+        return isRunning;
     }
 
     @Override
