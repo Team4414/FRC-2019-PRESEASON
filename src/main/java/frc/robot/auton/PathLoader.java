@@ -14,7 +14,7 @@ public class PathLoader{
     public static LinkedHashMap<String, Trajectory> loadPaths(){
         LinkedHashMap<String, Trajectory> paths = new LinkedHashMap<String, Trajectory>();
 
-        paths.put("DriveCurveLeft", getTraj("LeftCurve"));
+        paths.put("DriveLeftCurve", getTraj("LeftCurve"));
         // paths.put("DriveCurveRight", getTraj("RightCurve"));
 
         return paths;

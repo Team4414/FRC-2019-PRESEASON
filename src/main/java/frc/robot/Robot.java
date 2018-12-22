@@ -7,6 +7,7 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import frc.robot.auton.MoveCommand;
 import frc.robot.auton.PathLoader;
 import frc.robot.auton.Ramsete;
@@ -52,7 +53,7 @@ public class Robot extends IterativeRobot{;
 
         autonPaths = PathLoader.loadPaths();
 
-        autonCommand = new MoveCommand(autonPaths.get("LeftCurve"));
+        autonCommand = new MoveCommand(autonPaths.get("DriveLeftCurve"));
 
         PeriodicLogger.getInstance().start();
     }
@@ -65,12 +66,15 @@ public class Robot extends IterativeRobot{;
         Drivetrain.getInstance().startOdometery(kLocalizerTimestep);
         Ramsete.getInstance().start();
 
+        // Ramsete.getInstance().trackPath(autonPaths.get("LeftCurve"));
+
         autonCommand.start();
     }
 
     @Override
     public void autonomousPeriodic() {
-        //no-op
+        Scheduler.getInstance().run();
+        // System.out.println(autonPaths.get("DriveLeftCurve"));
     }
     
     @Override

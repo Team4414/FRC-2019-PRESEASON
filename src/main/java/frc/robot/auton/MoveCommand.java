@@ -21,11 +21,11 @@ public class MoveCommand extends Command{
             Ramsete.getInstance().trackPath(mPath);
         }
         System.out.println("Starting Move");
+        Ramsete.getInstance().forceStateUpdate();
     }
 
     @Override
     protected boolean isFinished() {
-        System.out.println("Status: " + Ramsete.getStatus());
         return Ramsete.getStatus() == Status.STANDBY;
     }
 
