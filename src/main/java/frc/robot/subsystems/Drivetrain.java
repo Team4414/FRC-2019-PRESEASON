@@ -22,11 +22,12 @@ public class Drivetrain extends Subsystem implements ILoggable{
     private static final int kPIDidx = 0;
     private static final int kCTRETimeout = 0; //no error reporting
 
-    //Odometery
+    //Odometery variables:
     private double mLastPos, mCurrentPos, mDeltaPos;
     volatile double x, y, theta;
     private Notifier odometery;
 
+    //Singleton:
     private static Drivetrain instance;
     public static Drivetrain getInstance(){
         if(instance == null)
@@ -34,16 +35,19 @@ public class Drivetrain extends Subsystem implements ILoggable{
         return instance;
     }
 
+    //Hardware Controllers:
     private TalonSRX mLeftMaster, mRightMaster;
 
     private VictorSPX mLeftSlaveA, mLeftSlaveB, mRightSlaveA, mRightSlaveB;
 
     private PigeonIMU mGyro;
 
+    //Zero Offsets:
     private double mLeftZeroOffset = 0;
     private double mRightZeroOffset = 0;
     private double mGyroOffset = 0;
 
+    //Drive Gains: 
     private double kP = 0.4;
     private double kI = 0;
     private double kD = 0;
@@ -60,6 +64,8 @@ public class Drivetrain extends Subsystem implements ILoggable{
         mRightSlaveA = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveA, mRightMaster);
         mRightSlaveB = TalonSRXFactory.createPermanentSlaveVictor(RobotMap.DrivetrainMap.kRightSlaveB, mRightMaster);
 
+        mGyro = new PigeonIMU(0);
+
         mLeftMaster.configOpenloopRamp(0.01, kCTRETimeout);
         mRightMaster.configOpenloopRamp(0.01, kCTRETimeout);
 
@@ -68,8 +74,6 @@ public class Drivetrain extends Subsystem implements ILoggable{
 
         mLeftMaster.enableVoltageCompensation(true);
         mRightMaster.enableVoltageCompensation(true);
-
-        mGyro = new PigeonIMU(0);
 
         mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx, kCTRETimeout);
         mRightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx,kCTRETimeout);
@@ -93,10 +97,12 @@ public class Drivetrain extends Subsystem implements ILoggable{
 
         setupLogger();
 
+        //Zero Odometery:
         x = 0;
         y = 0;
         theta = 0;
         
+        //Set up Odometery Notifier
         odometery = new Notifier(() ->{
             mCurrentPos = (getLeftSensorPosition() + getRightSensorPosition())/2.0;
             mDeltaPos = mCurrentPos - mLastPos;
@@ -108,43 +114,88 @@ public class Drivetrain extends Subsystem implements ILoggable{
     }
 
     @Override
-    protected void initDefaultCommand(){};
+    protected void initDefaultCommand(){ /*no op*/ };
 
+    /**
+     * Set Raw Speed Method
+     * 
+     * @param left Percent Output
+     * @param right Percent Output
+     */
     public void setRawSpeed(double left, double right){
         mLeftMaster.set(ControlMode.PercentOutput, left);
         mRightMaster.set(ControlMode.PercentOutput, right);
     }
 
+    /**
+     * Set Raw Speed Method
+     * 
+     * @param speeds Percent Outputs
+     */
     public void setRawSpeed(double[] speeds){
         setRawSpeed(speeds[0], speeds[1]);
     }
 
+    /**
+     * Set Velocity Method
+     * 
+     * @param left  Feet per Second
+     * @param right Feet per Second
+     */
     public void setVelocity(double left, double right){
         mLeftMaster.set(ControlMode.Velocity, left * Constants.kFPS2NativeU, DemandType.ArbitraryFeedForward , kFriction);
         mRightMaster.set(ControlMode.Velocity, right * Constants.kFPS2NativeU, DemandType.ArbitraryFeedForward, kFriction);
     }
 
+    /**
+     * Zero Sensor
+     * 
+     * <p> Zeroes all sensors (encoders + gyro) and odometery information </p>
+     */
     public void zeroSensor(){
         mLeftZeroOffset = mLeftMaster.getSelectedSensorPosition(kPIDidx);
         mRightZeroOffset = mRightMaster.getSelectedSensorPosition(kPIDidx);
         mGyroOffset = mGyro.getFusedHeading();
+        
         x = 0;
         y = 0;
         theta = 0;
     }
 
+    /**
+     * Start Odometery Method
+     * 
+     * <p> Starts tracking the robot position </p>
+     * 
+     * @param period timestep to update at.
+     */
     public void startOdometery(double period){
         odometery.startPeriodic(period);
     }
 
+    /**
+     * Stop Odometery Method
+     * 
+     * <p> Stops tracking the robot position </p>
+     */
     public void stopOdometery(){
         odometery.stop();
     }
 
+    /**
+     * Get Robot Position Method.
+     * 
+     * @return The position of the robot.
+     */
     public RobotPos getRobotPos(){
         return new RobotPos(x, y, theta);
     }
 
+    /**
+     * Get Gyro Angle.
+     * 
+     * @return The fused heading from the sensors.
+     */
     public double getGyroAngle(){
         return mGyro.getFusedHeading() - mGyroOffset;
     }
