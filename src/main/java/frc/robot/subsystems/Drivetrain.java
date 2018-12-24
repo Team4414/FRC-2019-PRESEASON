@@ -63,6 +63,12 @@ public class Drivetrain extends Subsystem implements ILoggable{
         mLeftMaster.configOpenloopRamp(0.01, kCTRETimeout);
         mRightMaster.configOpenloopRamp(0.01, kCTRETimeout);
 
+        mLeftMaster.configVoltageCompSaturation(12, kCTRETimeout);
+        mRightMaster.configVoltageCompSaturation(12, kCTRETimeout);
+
+        mLeftMaster.enableVoltageCompensation(true);
+        mRightMaster.enableVoltageCompensation(true);
+
         mGyro = new PigeonIMU(0);
 
         mLeftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, kPIDidx, kCTRETimeout);
@@ -133,14 +139,6 @@ public class Drivetrain extends Subsystem implements ILoggable{
 
     public void stopOdometery(){
         odometery.stop();
-    }
-
-    public double getRobotX(){
-        return this.x;
-    }
-
-    public double getRobotY(){
-        return this.y;
     }
 
     public RobotPos getRobotPos(){

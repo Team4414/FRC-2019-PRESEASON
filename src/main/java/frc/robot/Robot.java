@@ -105,7 +105,7 @@ public class Robot extends IterativeRobot{;
 
         Drivetrain.getInstance().stopOdometery();
         Ramsete.getInstance().stop();
-        System.out.println(Drivetrain.getInstance().getRobotX() + "\t\t\t" + Drivetrain.getInstance().getRobotY());
+        System.out.println(Drivetrain.getInstance().getRobotPos().getX() + "\t\t\t" + Drivetrain.getInstance().getRobotPos().getY());
     }
 
     public void intoEnabled(){
