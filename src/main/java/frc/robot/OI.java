@@ -25,12 +25,11 @@ public class OI{
     private static final int kTurnAxis = 0;
     private static final int kThrottleAxis = 1;
 
-    private static final int kQuickTurnButtonID = 6;
+    private static final int[] kQuickTurnButtonIDs = new int[]{6};
 
 
     private Joystick throttleNub;
     private Joystick turnNub;
-    private Joystick xbox;
      
     private OI(){
         throttleNub = new Joystick(kThrottleNubID);
@@ -53,7 +52,10 @@ public class OI{
     }
 
     public boolean getQuickTurn(){
-        return ((throttleNub.getRawButton(11))
-            ||  (throttleNub.getRawButton(10)));
+        for(int id: kQuickTurnButtonIDs){
+            if(throttleNub.getRawButton(id))
+                return true;
+         }
+        return false;
     }
 }

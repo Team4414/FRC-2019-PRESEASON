@@ -37,7 +37,7 @@ public class Drivetrain extends Subsystem implements ILoggable{
 
     //Hardware Controllers:
     private TalonSRX mLeftMaster, mRightMaster;
-
+    @SuppressWarnings("unused") 
     private VictorSPX mLeftSlaveA, mLeftSlaveB, mRightSlaveA, mRightSlaveB;
 
     private PigeonIMU mGyro;
